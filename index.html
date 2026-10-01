@@ -147,7 +147,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '2. 10. 2026 – přehledný sklad, menší písmo';
+var APP_VERSION = '2. 10. 2026 – legenda skladu';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -898,7 +898,8 @@ function skladView(){
     }).join('') + '</tr>';
   }).join('');
   var batoh = '<tr><td class="n">Batoh</td><td colspan="9" style="text-align:left;padding-left:6px' + ((M.min['Batoh|-'] || 0) && (M.stock['Batoh|-'] || 0) < (M.min['Batoh|-'] || 0) ? ';color:var(--amber);font-weight:600' : '') + '">' + (M.stock['Batoh|-'] || 0) + ' ks</td></tr>';
-  var matrix = '<div class="card" style="padding:7px 8px 5px"><div class="mini" style="font-size:10.5px;margin:0 0 3px 2px">Aktuální stav skladu (ks) · <span class="wr">žlutě</span> = pod minimem</div><div class="scrollx"><table class="mx">' + head + rows + batoh + '</table></div></div>';
+  var matrix = '<div class="card" style="padding:7px 8px 5px"><div class="mini" style="font-size:10.5px;margin:0 0 3px 2px">Aktuální stav skladu (ks)</div><div class="scrollx"><table class="mx">' + head + rows + batoh + '</table></div>' +
+    '<div class="mini" style="font-size:10px;margin:5px 2px 1px;display:flex;flex-wrap:wrap;gap:3px 12px"><span><b style="color:var(--text)">6</b> v pořádku (na minimu nebo nad ním)</span><span><b class="wr">6</b> pod minimem</span><span><span style="color:#5a626b">·</span> není skladem a minimum je 0</span></div></div>';
   var lowHtml = low.length ? ITEMS.map(function(item){
     var l = low.filter(function(x){ return x.item === item; }); if (!l.length) return '';
     var tot = l.reduce(function(a, x){ return a + x.need; }, 0);
