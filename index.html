@@ -124,7 +124,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '1. 10. 2026 – lišta: oprava rámečku';
+var APP_VERSION = '1. 10. 2026 – odesílací služba pro e-maily';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -277,6 +277,14 @@ var GoogleB = {
     });
   },
   mail: function(to, subject, text, from){
+    // Odesílací služba (Apps Script web app pod účtem správce): e-maily odcházejí vždy z info@, bez ohledu na to, kdo klikl
+    var relay = M && M.settings && M.settings.email_relay_url;
+    if (relay) {
+      return fetch(relay, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token: M.settings.email_relay_token || '', to: to, subject: subject, text: text }) })
+        .then(function(r){ return r.json(); })
+        .then(function(j){ if (!j || !j.ok) throw new Error((j && j.error) || 'odesílací služba selhala'); });
+    }
     function b64(s){ return btoa(unescape(encodeURIComponent(s))); }
     var raw = ['From: FK Slovany Pardubice <' + from + '>', 'Reply-To: ' + from, 'To: ' + to, 'Subject: =?UTF-8?B?' + b64(subject) + '?=',
       'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', b64(text).replace(/(.{76})/g, '$1\r\n')].join('\r\n');
@@ -772,7 +780,9 @@ function settingsView(){
   var em = ['objednavka','pripraveno','vydano'].map(function(k){ var e = M.emails[k] || {}; return '<div class="card"><b>' + esc(k) + '</b> <span class="mini">' + esc(e.popis || '') + '</span><label class="f">Předmět</label><input class="in" data-em="' + k + '|predmet" value="' + esc(e.predmet || '') + '"><label class="f">Text</label><textarea class="in" style="min-height:150px" data-em="' + k + '|text">' + esc(e.text || '') + '</textarea></div>'; }).join('');
   var cat = M.catalog.map(function(c){ return '<div class="kv"><span>' + esc(c.nazev) + ' <span class="mini">(' + esc(c.typ) + ')</span></span><span style="width:110px"><input class="in" style="height:36px;text-align:right" type="number" min="0" data-cat="' + esc(c.id) + '" value="' + esc(c.cena) + '" placeholder="Kč"></span></div>'; }).join('');
   return '<h2>Nastavení</h2><div class="sect">Vyzvednutí a e-maily</div><div class="card"><label class="f" style="margin-top:0">Místo a čas vyzvednutí (dosadí se do e-mailu)</label><input class="in" data-set="misto_vyzvednuti" value="' + esc(M.settings.misto_vyzvednuti || '') + '">' +
-    '<label class="f">Odesílatel e-mailů</label><input class="in" data-set="email_odesilatel" value="' + esc(M.settings.email_odesilatel || '') + '">' +
+    '<label class="f">Odesílatel e-mailů (použije se jen bez odesílací služby)</label><input class="in" data-set="email_odesilatel" value="' + esc(M.settings.email_odesilatel || '') + '">' +
+    '<label class="f">Odesílací služba – adresa (Apps Script web app)</label><input class="in" data-set="email_relay_url" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(M.settings.email_relay_url || '') + '">' +
+    '<label class="f">Odesílací služba – tajný klíč</label><input class="in" data-set="email_relay_token" placeholder="vložte klíč" value="' + esc(M.settings.email_relay_token || '') + '">' +
     '<label class="f">Ignorovat jména při importu (oddělte svislítkem |)</label><input class="in" data-set="ignorovat_jmena" value="' + esc(M.settings.ignorovat_jmena || '') + '"><button class="btn pri blk" style="margin-top:12px" data-act="saveSettings">Uložit</button></div>' +
     '<div class="sect">Minimální stav skladu</div>' + minHtml + '<button class="btn pri blk" data-act="saveMin">Uložit minima</button>' +
     '<div class="sect">Katalog – ceny (informativní)</div><div class="card">' + cat + '</div><button class="btn blk" data-act="saveCat">Uložit ceny</button>' +
