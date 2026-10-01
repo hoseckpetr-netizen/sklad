@@ -1,0 +1,15 @@
+{
+  "name": "Sklad oblečení – FK Slovany Pardubice",
+  "short_name": "Sklad",
+  "description": "Objednávky, výdej a sklad klubového oblečení FK Slovany Pardubice",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "lang": "cs",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

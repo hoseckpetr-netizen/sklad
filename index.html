@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sklad oblečení – FK Slovany Pardubice</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0d10">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--accent:#00FFFF;--bg:#0b0d10;--card:#1a1e23;--card2:#14181d;--border:#262b31;--text:#eef1f3;--muted:#9aa2ab;--green:#34D399;--red:#f87171;--amber:#fbbf24;--nav:64px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',system-ui,sans-serif;font-size:15px}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:calc(var(--nav) + 24px + env(safe-area-inset-bottom))}
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:rgba(11,13,16,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+header.top img{width:32px;height:32px;object-fit:contain}
+header.top .t{font-weight:600;font-size:15px;line-height:1.15}
+header.top .t small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+header.top .sp{flex:1}
+.ibtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ibtn:active{transform:scale(.95)}
+.ibtn.spin svg{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+main{padding:14px 16px}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:rgba(14,17,20,.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom .in{display:flex;width:100%;max-width:760px}
+nav.bottom button{flex:1;height:var(--nav);background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;cursor:pointer;position:relative}
+nav.bottom button.on{color:var(--accent)}
+nav.bottom button svg{width:22px;height:22px}
+nav.bottom .dot{position:absolute;top:9px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:8px;background:var(--red);color:#fff;font-size:10px;line-height:16px;text-align:center;padding:0 4px;font-weight:600}
+h2{font-size:18px;margin:4px 0 12px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px}
+.search{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:0 12px;height:46px;margin-bottom:10px}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,255,.12)}
+.search input{flex:1;background:none;border:0;outline:0;height:100%;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin:0 -16px 6px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:20px;padding:7px 14px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chip.on{border-color:var(--accent);color:var(--accent);background:rgba(0,255,255,.1)}
+.chip .n{opacity:.7;margin-left:4px}
+.ord{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
+.ord:active{background:#20252b}
+.ord.s-nova{border-left-color:var(--amber)} .ord.s-pripraveno{border-left-color:var(--accent)} .ord.s-vydano{border-left-color:var(--green);opacity:.75} .ord.s-storno{border-left-color:var(--red);opacity:.55}
+.ord .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.ord .nm{font-weight:600}
+.ord .pr{color:var(--muted);font-size:13px;white-space:nowrap}
+.ord .r2{color:var(--muted);font-size:12.5px;margin:2px 0 8px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.b{font-size:11.5px;border-radius:8px;padding:3px 8px;border:1px solid var(--border);color:var(--muted);background:var(--card2)}
+.b.ok{color:var(--green);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+.b.warn{color:var(--amber);border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.b.bad{color:var(--red);border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+.b.acc{color:var(--accent);border-color:rgba(0,255,255,.4);background:rgba(0,255,255,.08)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 18px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:500;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn.pri{background:var(--accent);color:#04201f;border-color:var(--accent);font-weight:600}
+.btn.red{color:var(--red);border-color:rgba(248,113,113,.4)}
+.btn.blk{width:100%}
+.btn:disabled{opacity:.45;pointer-events:none}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+label.f{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.in,select.in,textarea.in{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;height:46px;padding:0 12px;outline:0}
+textarea.in{height:auto;min-height:70px;padding:10px 12px}
+.in:focus{border-color:var(--accent)}
+select.in{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aa2ab' fill='none' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.seg{display:flex;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;height:38px;border:0;background:none;color:var(--muted);border-radius:11px;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--accent);box-shadow:0 0 0 1px var(--border)}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{font-weight:500;color:var(--muted);font-size:12px;text-align:right;padding:6px 8px}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t td{padding:10px 8px;border-top:1px solid var(--border);text-align:right}
+table.t tr.low td{background:rgba(251,191,36,.08)} table.t tr.neg td{background:rgba(248,113,113,.1)}
+table.t td.v{font-weight:600}
+.pos{color:var(--green)}.neg{color:var(--red)}.wr{color:var(--amber)}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;animation:fi .15s}
+@keyframes fi{from{opacity:0}}
+.sheet{width:100%;max-width:760px;max-height:92vh;overflow:auto;background:var(--bg);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));animation:up .2s}
+@keyframes up{from{transform:translateY(40px)}}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--border);margin:-6px auto 12px}
+.sheet h3{margin:0 0 2px;font-size:19px}
+.it{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+.it .nm{font-weight:500}.it .sub{font-size:12px;color:var(--muted)}
+.it input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.it select{height:38px;width:84px;border-radius:10px;padding:0 8px}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+.tg .l{font-weight:500}.tg .l small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.sw{position:relative;width:52px;height:30px;border-radius:15px;background:#2a3038;border:0;cursor:pointer;flex-shrink:0;transition:.15s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.15s}
+.sw.on{background:var(--accent)}.sw.on::after{left:25px;background:#04201f}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+#toastHost{position:fixed;left:0;right:0;bottom:calc(var(--nav) + 14px + env(safe-area-inset-bottom));z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+.toast{background:#222831;border:1px solid var(--border);border-radius:12px;padding:10px 16px;font-size:13.5px;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:up .2s;max-width:520px}
+.toast.err{border-color:var(--red);color:#fecaca}.toast.ok{border-color:rgba(52,211,153,.5)}
+.login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
+.login img{width:96px}.login .err{color:var(--red);font-size:13px;max-width:320px}
+.sect{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+.mini{font-size:12px;color:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--border);font-size:14px}
+.kv:first-child{border-top:0}
+.minigrid{display:grid;grid-template-columns:70px repeat(3,1fr);gap:6px;align-items:center;margin-bottom:4px}
+.minigrid .in{height:38px;padding:0 8px;text-align:center}
+@media(min-width:760px){main{padding:18px 0}header.top{padding-left:max(16px,calc(50vw - 380px))}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="ovHost"></div>
+<div id="toastHost"></div>
+
+<script>
+'use strict';
+/* ============================== KONFIGURACE ============================== */
+var CONFIG = {
+  CLIENT_ID: '263192844228-8e8inbfjl1shvsiont4jhmme8c53l6ef.apps.googleusercontent.com',
+  SPREADSHEET_ID: '1b5p7-rNaOBGqZklXdTXRm4j0QuujEgTTRZ_j1rnjXLc',   // databáze aplikace
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email',
+  ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
+  STAFF_EMAILS: ['fkslovany@gmail.com']
+};
+var APP_VERSION = '1. 10. 2026 – první verze';
+var DEMO = /[?&]demo=1/.test(location.search);
+
+var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
+var ALLSIZES = SIZES.concat(['-']);
+var ITEMS = ['Triko','Kraťasy','Tepláková souprava','Šusťáková bunda','Zimní bunda','Batoh'];
+var NOSIZE = { 'Batoh': true };
+var SIZECOL = { 'Zimní bunda':'Velikost zimní bundy','Šusťáková bunda':'Velikost šusťákové bundy','Tepláková souprava':'Velikost teplákové soupravy','Triko':'Velikost trika','Kraťasy':'Velikost kraťasů' };
+
+var SCHEMA = {
+  Objednavky: ['id','zdroj_klic','cas','hrac','kategorie','email','typ_setu','extra','poznamka','cena','kis','pripraveno','pripraveno_cas','pripraveno_kdo','vydano','vydano_cas','vydano_kdo','poznamka_personal','stav','upraveno'],
+  Polozky: ['id','order_id','item','velikost','ks','vydano_ks','puvod'],
+  Pohyby: ['id','cas','typ','item','velikost','ks','order_id','kdo','poznamka'],
+  Katalog: ['id','nazev','typ','cena','velikosti','poradi','aktivni'],
+  Sety: ['set','item','ks'],
+  Minima: ['item'].concat(ALLSIZES),
+  Nastaveni: ['klic','hodnota'],
+  Emaily: ['klic','popis','predmet','text'],
+  Kategorie: ['nazev']
+};
+
+/* ------------------------------- SEED ---------------------------------- */
+function buildSeed() {
+  var init = { 'Triko':[0,6,9,0,0,0,0,0,0,0], 'Kraťasy':[0,2,0,0,1,1,0,0,0,0], 'Tepláková souprava':[1,2,7,14,7,4,0,0,0,0],
+    'Šusťáková bunda':[0,3,0,11,7,1,1,0,0,0], 'Zimní bunda':[0,1,0,8,4,5,1,0,0,0], 'Batoh':[0,0,0,0,0,0,0,0,0,8] };
+  var ideal = { 'Triko':[5,5,10,20,20,5,5,0,0,0], 'Kraťasy':[5,5,10,20,20,5,5,0,0,0], 'Tepláková souprava':[5,5,10,20,20,5,5,0,0,0],
+    'Šusťáková bunda':[5,5,10,20,20,5,5,0,0,0], 'Zimní bunda':[5,5,10,20,20,5,5,0,0,0], 'Batoh':[0,0,0,0,0,0,0,0,0,10] };
+  var now = new Date().toISOString(), s = {};
+  var prices = { 'Triko':250,'Kraťasy':250,'Tepláková souprava':800,'Šusťáková bunda':'','Zimní bunda':800,'Batoh':'' };
+  s.Katalog = ITEMS.map(function(n,i){ return ['i'+(i+1), n, 'polozka', prices[n], NOSIZE[n]?0:1, i+1, 1]; });
+  s.Katalog.push(['s1','Kompletní set','set',2300,1,10,1],['s2','Set bez zimní bundy','set','',1,11,1],
+    ['s3','Set bez zimní bundy a batohu','set','',1,12,1],['s4','Triko a kraťasy','set',500,1,13,1]);
+  s.Sety = [];
+  ITEMS.forEach(function(i){ s.Sety.push(['Kompletní set',i,1]); });
+  ITEMS.filter(function(i){return i!=='Zimní bunda';}).forEach(function(i){ s.Sety.push(['Set bez zimní bundy',i,1]); });
+  ITEMS.filter(function(i){return i!=='Zimní bunda'&&i!=='Batoh';}).forEach(function(i){ s.Sety.push(['Set bez zimní bundy a batohu',i,1]); });
+  ['Triko','Kraťasy'].forEach(function(i){ s.Sety.push(['Triko a kraťasy',i,1]); });
+  s.Minima = ITEMS.map(function(i){ return [i].concat(ideal[i]); });
+  s.Pohyby = []; var n = 1;
+  ITEMS.forEach(function(i){ ALLSIZES.forEach(function(sz,k){ if (init[i][k]) s.Pohyby.push(['m'+(n++), now, 'POC', i, sz, init[i][k], '', 'migrace', 'Počáteční stav z původní tabulky']); }); });
+  s.Nastaveni = [['misto_vyzvednuti','[doplňte místo a čas vyzvednutí]'],['email_odesilatel','info@fkslovany.cz'],['email_upozorneni','info@fkslovany.cz'],
+    ['ignorovat_jmena','Petr Pokus|Veronika Hošková test!|Vejunka sekretářová'],
+    ['zdroj_spreadsheet_id','1Yi8u3c6WusM2LJYq9zHWzXys6DHKdhQCaBh9iqA2Nds'],['zdroj_list','Objednávky']];
+  s.Emaily = [
+    ['objednavka','Potvrzení objednávky (odesílá stále původní skript při odeslání formuláře)','Objednávka klubového oblečení k nám dorazila!','Ahoj,\n\nobjednávka klubového oblečení pro [Jméno hráče] právě bezpečně skončila v naší síti! 🥅\n\nShrnutí objednávky:\n- Kategorie: [Kategorie]\n- Typ setu: [Typ setu]\n\nTeď objednávku zpracujeme, zkontrolujeme skladové zásoby a připravíme vše k vyzvednutí. Jakmile bude oblečení připravené, ozveme se dalším e-mailem.\n\nDíky, že obléknete naše klubové barvy!\n\nTvůj klub - FK Slovany Pardubice'],
+    ['pripraveno','Odesílá se při označení „Připraveno k vyzvednutí“','Oblečení je nachystané – pojďte si ho vyzvednout!','Ahoj,\n\nklubové oblečení pro [Jméno hráče] nedočkavě čeká, až si ho vyzvednete. Sedí na lavičce a odmítá jít na hřiště bez vás.\n\nVyzvednutí je možné [místo vyzvednutí].\n\nDíky a těšíme se na vás!\n\nTvůj klub - FK Slovany Pardubice'],
+    ['vydano','Odesílá se po vydání objednávky','Oblečení vyzvednuto - děkujeme!','Ahoj,\n\nklubové oblečení pro [Jméno hráče] bylo právě úspěšně vyzvednuto a předáno!\n\nOd teď už zbývá jen jedno: obléknout ho a vyrazit na hřiště.\n\nDěkujeme za spolupráci a přejeme hodně gólů v nových dresech!\n\nTvůj klub - FK Slovany Pardubice']];
+  s.Kategorie = ['U7 – Minipřípravka','U9 – Mladší přípravka','U11 – Starší přípravka','U13 – Mladší žáci','U15 – Starší žáci','U17 – Mladší dorost','U19 – Starší dorost','Dospělí'].map(function(x){return [x];});
+  s.Objednavky = []; s.Polozky = [];
+  return s;
+}
+
+/* ================================ UTIL =================================== */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function num(v){ var n = parseFloat(String(v==null?'':v).replace(',','.')); return isNaN(n)?0:n; }
+function truthy(v){ return v===true || String(v).toUpperCase()==='TRUE' || String(v)==='1'; }
+function fmtDT(iso){ if(!iso) return ''; var d = new Date(iso); if (isNaN(d)) return String(iso); return d.getDate()+'. '+(d.getMonth()+1)+'. '+d.getFullYear()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); }
+function fmtD(iso){ if(!iso) return ''; var d = new Date(iso); if (isNaN(d)) return String(iso); return d.getDate()+'. '+(d.getMonth()+1)+'. '+d.getFullYear(); }
+function kc(n){ return (num(n)).toLocaleString('cs-CZ')+' Kč'; }
+function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function validSize(item, sz){ return NOSIZE[item] ? sz==='-' : SIZES.indexOf(sz) !== -1; }
+function colLetter(n){ var s=''; while(n>0){ var m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=(n-m-1)/26; } return s; }
+function toast(msg, kind){ var h=document.getElementById('toastHost'); var d=document.createElement('div'); d.className='toast '+(kind||''); d.textContent=msg; h.appendChild(d); setTimeout(function(){ d.remove(); }, kind==='err'?6000:3000); }
+
+var ICON = {
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>',
+  out:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3.3 7.5L12 12.5l8.7-5M12 22V12.5"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9M10 13h4"/></svg>',
+  in:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>',
+  cog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-15.5 6.2L3 16M3 12A9 9 0 0118.5 5.8L21 8M21 3v5h-5M3 21v-5h5"/></svg>',
+  search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b737c" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+  out2:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>'
+};
+
+/* ============================== BACKEND ================================== */
+var token = null, userEmail = '', role = null;
+
+// ---- Demo backend (v paměti, pro lokální testování: ?demo=1)
+var DemoB = {
+  tabs: null, src: null, outbox: [],
+  init: function(){
+    var seed = buildSeed(); this.tabs = {};
+    for (var t in SCHEMA) this.tabs[t] = [SCHEMA[t]].concat(seed[t] || []);
+    var h = ['Časová značka','Jméno a příjmení hráče','Kategorie','Typ setu','Velikost zimní bundy','Velikost šusťákové bundy','Velikost teplákové soupravy','Velikost trika','Volitelné položky navíc','Poznámka','Souhlas s objednávkou','Velikost kraťasů','E-mail rodiče/zástupce','E-mail rodiče/zástupce','E-mail','Celková cena','KIS','Připraveno','Vydáno'];
+    this.src = [h,
+      ['2.9.2026 21:33:34','Petr Pokus','U13 – Mladší žáci','Kompletní set  – 2 300 Kč','XS','2XS','XS','XS','','','ANO','','','','','2300 Kč','TRUE','FALSE','FALSE'],
+      ['6.9.2026 12:15:08','Samuel Mayer','U9 – Mladší přípravka','Kompletní set  – 2 300 Kč','3XS','3XS','2XS','3XS','','','ANO','','rodic@example.cz','','','2300 Kč','TRUE','FALSE','FALSE'],
+      ['7.9.2026 19:18:43','Tobiáš Harák','U7 – Minipřípravka','Triko – 250 Kč','NE','NE','NE','2XS','Kraťasy – 250 Kč','','ANO','3XS','','','','500 Kč','TRUE','FALSE','FALSE'],
+      ['8.9.2026 9:05:49','Oliver Wingfield','U13 – Mladší žáci','Kompletní set  – 2 300 Kč','S','S','S','S','','','ANO','S','','','','2300 Kč','TRUE','FALSE','FALSE'],
+      ['9.9.2026 6:56:17','Tomáš Medek','U13 – Mladší žáci','Triko – 250 Kč','NE','NE','NE','S','Kraťasy – 250 Kč','','ANO','M','','','','500 Kč','TRUE','FALSE','FALSE'],
+      ['3.9.2026 22:55:18','Veronika Hošková test!','U11 – Starší přípravka','Triko a kraťasy – 500 Kč','NE','NE','NE','L','Tepláková souprava – 800 Kč, Zimní bunda – 800 Kč','A jezdi!','ANO','','','','','2100 Kč','TRUE','FALSE','FALSE'],
+      ['18.9.2026 14:31:24','Vorontsov Mykola','U12','Kompletní set  – 2 300 Kč','S','S','S','S','','','ANO','S','','','','2300 Kč','TRUE','FALSE','FALSE']];
+  },
+  meta: function(){ return Promise.resolve(Object.keys(this.tabs)); },
+  readAll: function(){ var o = {}, T = this.tabs; Object.keys(T).forEach(function(k){ o[k] = JSON.parse(JSON.stringify(T[k])); }); return Promise.resolve(o); },
+  readSource: function(){ return Promise.resolve(this.src); },
+  append: function(tab, rows){ var T=this.tabs[tab]; rows.forEach(function(r){ T.push(r.slice()); }); return Promise.resolve(); },
+  update: function(list){ var T=this.tabs; list.forEach(function(u){ T[u.tab][u.row-1] = u.values.slice(); }); return Promise.resolve(); },
+  setup: function(){ var seed = buildSeed(); this.tabs = {}; for (var t in SCHEMA) this.tabs[t] = [SCHEMA[t]].concat(seed[t]||[]); return Promise.resolve(); },
+  mail: function(to, subject, text){ this.outbox.push({to:to,subject:subject,text:text}); console.log('[DEMO e-mail]', to, subject); return Promise.resolve(); }
+};
+
+// ---- Google backend
+function gfetch(url, opts){
+  opts = opts || {}; opts.headers = Object.assign({ 'Authorization': 'Bearer ' + token }, opts.headers || {});
+  return fetch(url, opts).then(function(r){
+    if (r.status === 401) { var e = new Error('Přihlášení vypršelo'); e.auth = true; throw e; }
+    if (!r.ok) return r.json().catch(function(){return {};}).then(function(j){ throw new Error((j.error && j.error.message) || ('HTTP ' + r.status)); });
+    return r.json();
+  });
+}
+var SHEETS = 'https://sheets.googleapis.com/v4/spreadsheets/';
+var GoogleB = {
+  meta: function(){ return gfetch(SHEETS + CONFIG.SPREADSHEET_ID + '?fields=sheets.properties(sheetId,title)').then(function(j){ return j.sheets.map(function(s){ return s.properties.title; }); }); },
+  readAll: function(){
+    var q = Object.keys(SCHEMA).map(function(t){ return 'ranges=' + encodeURIComponent(t); }).join('&');
+    return gfetch(SHEETS + CONFIG.SPREADSHEET_ID + '/values:batchGet?valueRenderOption=UNFORMATTED_VALUE&' + q).then(function(j){
+      var o = {}; j.valueRanges.forEach(function(vr, i){ o[Object.keys(SCHEMA)[i]] = vr.values || []; }); return o;
+    });
+  },
+  readSource: function(id, tab){
+    return gfetch(SHEETS + id + '/values/' + encodeURIComponent(tab + '!A1:Z2000') + '?valueRenderOption=FORMATTED_VALUE').then(function(j){ return j.values || []; });
+  },
+  append: function(tab, rows){
+    if (!rows.length) return Promise.resolve();
+    return gfetch(SHEETS + CONFIG.SPREADSHEET_ID + '/values/' + encodeURIComponent(tab + '!A1') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',
+      { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ values: rows }) });
+  },
+  update: function(list){
+    if (!list.length) return Promise.resolve();
+    var data = list.map(function(u){ return { range: u.tab + '!A' + u.row + ':' + colLetter(u.values.length) + u.row, values: [u.values] }; });
+    return gfetch(SHEETS + CONFIG.SPREADSHEET_ID + '/values:batchUpdate', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ valueInputOption:'RAW', data: data }) });
+  },
+  setup: function(){
+    var self = this;
+    return gfetch(SHEETS + CONFIG.SPREADSHEET_ID + '?fields=sheets.properties(sheetId,title)').then(function(j){
+      var have = j.sheets.map(function(s){ return s.properties.title; }), reqs = [];
+      var names = Object.keys(SCHEMA), spare = j.sheets.length === 1 && names.indexOf(have[0]) === -1 ? j.sheets[0].properties.sheetId : null;
+      names.forEach(function(n, i){
+        if (have.indexOf(n) !== -1) return;
+        if (spare !== null) { reqs.push({ updateSheetProperties: { properties: { sheetId: spare, title: n }, fields: 'title' } }); spare = null; }
+        else reqs.push({ addSheet: { properties: { title: n } } });
+      });
+      return reqs.length ? gfetch(SHEETS + CONFIG.SPREADSHEET_ID + ':batchUpdate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ requests: reqs }) }) : null;
+    }).then(function(){
+      var seed = buildSeed(), data = Object.keys(SCHEMA).map(function(t){ return { range: t + '!A1', values: [SCHEMA[t]].concat(seed[t] || []) }; });
+      return gfetch(SHEETS + CONFIG.SPREADSHEET_ID + '/values:batchUpdate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ valueInputOption:'RAW', data: data }) });
+    });
+  },
+  mail: function(to, subject, text, from){
+    function b64(s){ return btoa(unescape(encodeURIComponent(s))); }
+    var raw = ['From: FK Slovany Pardubice <' + from + '>', 'Reply-To: ' + from, 'To: ' + to, 'Subject: =?UTF-8?B?' + b64(subject) + '?=',
+      'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', b64(text).replace(/(.{76})/g, '$1\r\n')].join('\r\n');
+    var enc = btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    return gfetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ raw: enc }) });
+  }
+};
+var B = DEMO ? DemoB : GoogleB;
+
+/* ================================ MODEL ================================== */
+var M = { loaded:false, needSetup:false };
+var UI = { tab:'orders', filter:'open', q:'', vydejMode:'orders', skladItem:'Triko', openOrder:null, busy:false, importInfo:'' };
+
+function toObjs(tab, rows){
+  var cols = SCHEMA[tab], out = [];
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i] || [], o = { _row: i + 1 }, any = false;
+    for (var c = 0; c < cols.length; c++) { o[cols[c]] = r[c] === undefined ? '' : r[c]; if (r[c] !== undefined && r[c] !== '') any = true; }
+    if (any) out.push(o);
+  }
+  return out;
+}
+function toRow(tab, o){ return SCHEMA[tab].map(function(c){ var v = o[c]; return v === undefined || v === null ? '' : v; }); }
+
+function buildModel(raw){
+  M.orders = toObjs('Objednavky', raw.Objednavky || []);
+  M.items = toObjs('Polozky', raw.Polozky || []);
+  M.moves = toObjs('Pohyby', raw.Pohyby || []);
+  M.catalog = toObjs('Katalog', raw.Katalog || []);
+  M.minRows = toObjs('Minima', raw.Minima || []);
+  M.emailRows = toObjs('Emaily', raw.Emaily || []);
+  M.settingRows = toObjs('Nastaveni', raw.Nastaveni || []);
+  M.cats = toObjs('Kategorie', raw.Kategorie || []).map(function(c){ return c.nazev; });
+  M.sets = {}; toObjs('Sety', raw.Sety || []).forEach(function(s){ (M.sets[s.set] = M.sets[s.set] || []).push({ item: s.item, ks: num(s.ks) || 1 }); });
+  M.settings = {}; M.settingRows.forEach(function(s){ M.settings[s.klic] = String(s.hodnota); });
+  M.min = {}; M.minRows.forEach(function(r){ ALLSIZES.forEach(function(sz){ M.min[r.item + '|' + sz] = num(r[sz]); }); });
+  M.emails = {}; M.emailRows.forEach(function(e){ M.emails[e.klic] = e; });
+  // stav skladu
+  M.stock = {}; M.moves.forEach(function(m){ var k = m.item + '|' + m.velikost; M.stock[k] = (M.stock[k] || 0) + num(m.ks); });
+  // položky podle objednávek
+  M.itemsBy = {}; M.items.forEach(function(it){ it.ks = num(it.ks); it.vydano_ks = num(it.vydano_ks); (M.itemsBy[it.order_id] = M.itemsBy[it.order_id] || []).push(it); });
+  M.orders.forEach(function(o){ o.kisB = truthy(o.kis); o.prB = truthy(o.pripraveno); o.vyB = truthy(o.vydano); o.items = M.itemsBy[o.id] || []; });
+  // rezervace (FIFO podle data objednávky)
+  M.reserved = {}; var cum = {};
+  var open = M.orders.filter(isOpen).sort(function(a,b){ return String(a.cas) < String(b.cas) ? -1 : 1; });
+  open.forEach(function(o){
+    o.items.forEach(function(it){
+      it._short = false; it._nosize = false;
+      var rem = it.ks - it.vydano_ks; if (rem <= 0) return;
+      if (!validSize(it.item, it.velikost)) { it._nosize = true; return; }
+      var k = it.item + '|' + it.velikost; cum[k] = (cum[k] || 0) + rem; M.reserved[k] = cum[k];
+      it._short = cum[k] > (M.stock[k] || 0);
+    });
+  });
+  M.orders.forEach(function(o){
+    o.warnSize = o.items.some(function(i){ return i._nosize; });
+    o.warnShort = o.items.some(function(i){ return i._short; });
+    o.noItems = o.items.length === 0 && o.stav !== 'storno';
+    o.problem = isOpen(o) && (o.warnSize || o.warnShort || o.noItems);
+  });
+  M.orders.sort(function(a,b){ return String(a.cas) < String(b.cas) ? 1 : -1; });
+}
+function isOpen(o){ return o.stav !== 'storno' && !truthy(o.vydano); }
+function freeOf(item, sz){ var k = item + '|' + sz; return (M.stock[k] || 0) - (M.reserved[k] || 0); }
+
+function loadAll(){
+  return B.meta().then(function(names){
+    var missing = Object.keys(SCHEMA).filter(function(t){ return names.indexOf(t) === -1; });
+    M.needSetup = missing.length > 0;
+    if (M.needSetup) { M.loaded = true; return; }
+    return B.readAll().then(function(raw){
+      // prázdná tabulka bez hlavičky => ještě nenaplněno
+      if (!raw.Pohyby || !raw.Pohyby.length) { M.needSetup = true; M.loaded = true; return; }
+      buildModel(raw); M.loaded = true;
+    });
+  });
+}
+
+/* ---- import objednávek z původní tabulky (formulář) ---- */
+function parseSource(rows){
+  var h = rows[0] || [];
+  function col(name){ for (var i = 0; i < h.length; i++) if (String(h[i]).trim().indexOf(name) === 0) return i; return -1; }
+  var c = { ts: col('Časová značka'), name: col('Jméno a příjmení'), kat: col('Kategorie'), typ: col('Typ setu'), extra: col('Volitelné položky'),
+    pozn: col('Poznámka'), cena: col('Celková cena'), kis: col('KIS'), prip: col('Připraveno'), vyd: col('Vydáno') };
+  var emailCols = []; h.forEach(function(x, i){ if (String(x).trim().indexOf('E-mail') === 0) emailCols.push(i); });
+  var sizeIdx = {}; Object.keys(SIZECOL).forEach(function(it){ sizeIdx[it] = col(SIZECOL[it]); });
+  var out = [];
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i] || [], name = String(c.name >= 0 ? r[c.name] || '' : '').trim();
+    if (!name) continue;
+    var email = ''; emailCols.forEach(function(ci){ if (!email && String(r[ci] || '').trim()) email = String(r[ci]).trim(); });
+    var sizes = {}; Object.keys(sizeIdx).forEach(function(it){ var v = sizeIdx[it] >= 0 ? String(r[sizeIdx[it]] || '').trim().toUpperCase() : ''; sizes[it] = SIZES.indexOf(v) !== -1 ? v : ''; });
+    out.push({ key: String(c.ts >= 0 ? r[c.ts] || '' : '').trim() + '|' + name, ts: String(r[c.ts] || '').trim(), name: name,
+      kat: String(c.kat >= 0 ? r[c.kat] || '' : '').trim(), typ: String(c.typ >= 0 ? r[c.typ] || '' : '').trim(),
+      extra: String(c.extra >= 0 ? r[c.extra] || '' : '').trim(), pozn: String(c.pozn >= 0 ? r[c.pozn] || '' : '').trim(),
+      cena: String(c.cena >= 0 ? r[c.cena] || '' : ''), email: email, sizes: sizes,
+      kis: truthy(c.kis >= 0 ? r[c.kis] : ''), prip: truthy(c.prip >= 0 ? r[c.prip] : ''), vyd: truthy(c.vyd >= 0 ? r[c.vyd] : '') });
+  }
+  return out;
+}
+function parseTs(s){ // "2.9.2026 21:33:34" -> ISO
+  var m = String(s).match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return new Date().toISOString();
+  return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5], +(m[6]||0)).toISOString();
+}
+function priceFromText(t){ var m = String(t).match(/(\d[\d\s]*)\s*Kč/); return m ? parseInt(m[1].replace(/\s/g,''), 10) || 0 : 0; }
+function buildOrderFromSource(s){
+  var typName = s.typ.replace(/\s+/g,' ').split(/ [–-] /)[0].trim();
+  var items = [], oid = uid('o');
+  function add(item, puvod){
+    for (var i = 0; i < items.length; i++) if (items[i].item === item) { items[i].ks++; return; }
+    items.push({ item: item, ks: 1, puvod: puvod });
+  }
+  if (M.sets[typName]) M.sets[typName].forEach(function(x){ for (var k = 0; k < x.ks; k++) add(x.item, 'set'); });
+  else if (ITEMS.indexOf(typName) !== -1) add(typName, 'typ');
+  s.extra.split(',').forEach(function(p){ var n = p.split(/ [–-] /)[0].trim(); if (ITEMS.indexOf(n) !== -1) add(n, 'extra'); });
+  var cena = priceFromText(s.cena) || (priceFromText(s.typ) + s.extra.split(',').reduce(function(a,p){ return a + priceFromText(p); }, 0));
+  var stav = s.vyd ? 'vydano' : (s.prip ? 'pripraveno' : 'nova');
+  var order = { id: oid, zdroj_klic: s.key, cas: parseTs(s.ts), hrac: s.name, kategorie: s.kat, email: s.email, typ_setu: typName || s.typ, extra: s.extra,
+    poznamka: s.pozn, cena: cena, kis: s.kis, pripraveno: s.prip || s.vyd, pripraveno_cas: '', pripraveno_kdo: (s.prip || s.vyd) ? 'převzato z původní tabulky' : '',
+    vydano: s.vyd, vydano_cas: '', vydano_kdo: s.vyd ? 'převzato z původní tabulky' : '', poznamka_personal: '', stav: stav, upraveno: new Date().toISOString() };
+  var its = items.map(function(x){
+    var sz = NOSIZE[x.item] ? '-' : (s.sizes[x.item] || '');
+    return { id: uid('p'), order_id: oid, item: x.item, velikost: sz, ks: x.ks, vydano_ks: s.vyd ? x.ks : 0, puvod: x.puvod };
+  });
+  return { order: order, items: its };
+}
+function importSource(){
+  var sid = M.settings.zdroj_spreadsheet_id, tab = M.settings.zdroj_list || 'Objednávky';
+  if (!sid && !DEMO) return Promise.resolve(0);
+  return B.readSource(sid, tab).then(function(rows){
+    var parsed = parseSource(rows), known = {}; M.orders.forEach(function(o){ known[o.zdroj_klic] = 1; });
+    var ign = (M.settings.ignorovat_jmena || '').split('|').map(function(x){ return x.trim().toLowerCase(); }).filter(Boolean);
+    var no = [], ni = [];
+    parsed.forEach(function(s){
+      if (known[s.key] || ign.indexOf(s.name.toLowerCase()) !== -1) return;
+      var b = buildOrderFromSource(s); no.push(toRow('Objednavky', b.order)); b.items.forEach(function(i){ ni.push(toRow('Polozky', i)); });
+    });
+    if (!no.length) return 0;
+    return B.append('Objednavky', no).then(function(){ return B.append('Polozky', ni); }).then(function(){ return no.length; });
+  });
+}
+
+/* ============================== AKCE (zápis) ============================== */
+function refresh(quiet){
+  UI.busy = true; renderTop();
+  return loadAll().then(function(){
+    if (M.needSetup) return 0;
+    return importSource().then(function(n){ UI.importInfo = n ? 'Importováno nových objednávek: ' + n : ''; if (n) { toast('Nových objednávek z formuláře: ' + n, 'ok'); return loadAll(); } });
+  }).catch(function(e){ handleErr(e); }).then(function(){ UI.busy = false; renderAll(); });
+}
+function handleErr(e){
+  console.error(e);
+  if (e && e.auth) { token = null; toast('Přihlášení vypršelo – přihlaste se znovu.', 'err'); showLogin(); return; }
+  toast('Chyba: ' + (e && e.message || e), 'err');
+}
+function save(promise, okMsg){
+  UI.busy = true; renderTop();
+  return promise.then(function(){ return loadAll(); }).then(function(){ UI.busy = false; renderAll(); if (okMsg) toast(okMsg, 'ok'); })
+    .catch(function(e){ UI.busy = false; handleErr(e); return loadAll().then(renderAll).catch(function(){}); });
+}
+function orderUpdate(o, patch){
+  Object.assign(o, patch, { upraveno: new Date().toISOString() });
+  return { tab:'Objednavky', row:o._row, values: toRow('Objednavky', o) };
+}
+function itemUpdate(it, patch){ Object.assign(it, patch); return { tab:'Polozky', row:it._row, values: toRow('Polozky', it) }; }
+function moveRow(typ, item, sz, ks, orderId, note){ return toRow('Pohyby', { id: uid('m'), cas: new Date().toISOString(), typ: typ, item: item, velikost: sz, ks: ks, order_id: orderId || '', kdo: userEmail, poznamka: note || '' }); }
+
+function fillTemplate(txt, o){
+  return String(txt || '').split('[Jméno hráče]').join(o.hrac || '').split('[Jmeno hrace]').join(o.hrac || '')
+    .split('[Kategorie]').join(o.kategorie || '').split('[Typ setu]').join(o.typ_setu || '')
+    .split('[místo vyzvednutí]').join(M.settings.misto_vyzvednuti || '').split('[doplníme kde/kdy]').join(M.settings.misto_vyzvednuti || '');
+}
+function sendTemplate(key, o){
+  var t = M.emails[key]; if (!t) return Promise.resolve(false);
+  if (!o.email) { toast('Rodič nemá vyplněný e-mail – e-mail se neodeslal.', 'err'); return Promise.resolve(false); }
+  return B.mail(o.email, fillTemplate(t.predmet, o), fillTemplate(t.text, o), M.settings.email_odesilatel || 'info@fkslovany.cz')
+    .then(function(){ return true; }).catch(function(e){ toast('E-mail se nepodařilo odeslat: ' + e.message, 'err'); return false; });
+}
+
+function actKis(o){
+  var on = !o.kisB;
+  return confirmBox(on ? 'Potvrdit platbu v KIS?' : 'Zrušit potvrzení platby?', o.hrac + ' – ' + kc(o.cena), on ? 'Platba přijata' : 'Zrušit').then(function(ok){
+    if (!ok) return; return save(B.update([orderUpdate(o, { kis: on })]), on ? 'Platba potvrzena' : 'Platba odznačena');
+  });
+}
+function actPripraveno(o){
+  var on = !o.prB;
+  var msg = on ? (o.email ? 'Rodiči (' + o.email + ') se odešle e-mail, že je oblečení připravené.' : 'Rodič nemá e-mail, e-mail se neodešle.') : 'Označení se zruší, e-mail se neodesílá.';
+  return confirmBox(on ? 'Označit jako připravené?' : 'Zrušit „připraveno“?', msg, on ? 'Připraveno' : 'Zrušit').then(function(ok){
+    if (!ok) return;
+    var p = on ? { pripraveno: true, pripraveno_cas: new Date().toISOString(), pripraveno_kdo: userEmail, stav: o.vyB ? 'vydano' : 'pripraveno' }
+               : { pripraveno: false, pripraveno_cas: '', pripraveno_kdo: '', stav: o.vyB ? 'vydano' : 'nova' };
+    return save(B.update([orderUpdate(o, p)]), on ? 'Označeno jako připravené' : 'Odznačeno').then(function(){ if (on) return sendTemplate('pripraveno', o); });
+  });
+}
+function actVydat(o, itemIds){
+  var sel = o.items.filter(function(i){ return itemIds.indexOf(i.id) !== -1 && i.ks - i.vydano_ks > 0; });
+  if (!sel.length) { toast('Není vybraná žádná položka k vydání.', 'err'); return Promise.resolve(); }
+  var bad = sel.filter(function(i){ return !validSize(i.item, i.velikost); });
+  if (bad.length) { toast('Chybí velikost: ' + bad.map(function(i){ return i.item; }).join(', '), 'err'); return Promise.resolve(); }
+  var short = sel.filter(function(i){ return (M.stock[i.item + '|' + i.velikost] || 0) < i.ks - i.vydano_ks; });
+  if (short.length) { toast('Není skladem: ' + short.map(function(i){ return i.item + ' ' + i.velikost; }).join(', '), 'err'); return Promise.resolve(); }
+  var willAll = o.items.every(function(i){ return i.ks - i.vydano_ks <= 0 || itemIds.indexOf(i.id) !== -1; });
+  var warn = o.kisB ? '' : '\n⚠ Platba v KIS zatím není potvrzena.';
+  var text = sel.map(function(i){ return (i.ks - i.vydano_ks) + '× ' + i.item + (NOSIZE[i.item] ? '' : ' ' + i.velikost); }).join(', ') + (willAll ? '\nObjednávka bude označena jako vydaná, rodiči se odešle e-mail.' : '\nČástečný výdej – objednávka zůstane otevřená.') + warn;
+  return confirmBox('Vydat ' + o.hrac + '?', text, 'Vydat').then(function(ok){
+    if (!ok) return;
+    var ups = [], mv = [];
+    sel.forEach(function(i){ var n = i.ks - i.vydano_ks; mv.push(moveRow('VYDEJ', i.item, i.velikost, -n, o.id, 'Výdej – ' + o.hrac)); ups.push(itemUpdate(i, { vydano_ks: i.ks })); });
+    if (willAll) ups.push(orderUpdate(o, { vydano: true, vydano_cas: new Date().toISOString(), vydano_kdo: userEmail, stav: 'vydano', pripraveno: true }));
+    return save(B.append('Pohyby', mv).then(function(){ return B.update(ups); }), willAll ? 'Vydáno' : 'Částečně vydáno').then(function(){ if (willAll) return sendTemplate('vydano', o); });
+  });
+}
+function actVratit(o){
+  var done = o.items.filter(function(i){ return i.vydano_ks > 0; });
+  if (!done.length) return Promise.resolve();
+  return confirmBox('Vrátit výdej?', 'Vydané kusy se vrátí na sklad a objednávka se znovu otevře. E-mail se neodesílá.', 'Vrátit').then(function(ok){
+    if (!ok) return;
+    var mv = [], ups = [];
+    done.forEach(function(i){ if (validSize(i.item, i.velikost) && o.vydano_kdo !== 'převzato z původní tabulky') mv.push(moveRow('VRACENI', i.item, i.velikost, i.vydano_ks, o.id, 'Vrácení výdeje – ' + o.hrac)); ups.push(itemUpdate(i, { vydano_ks: 0 })); });
+    ups.push(orderUpdate(o, { vydano: false, vydano_cas: '', vydano_kdo: '', stav: o.prB ? 'pripraveno' : 'nova' }));
+    return save(B.append('Pohyby', mv).then(function(){ return B.update(ups); }), 'Výdej vrácen');
+  });
+}
+function actStorno(o){
+  var on = o.stav !== 'storno';
+  return confirmBox(on ? 'Stornovat objednávku?' : 'Obnovit objednávku?', on ? 'Rezervace se uvolní. Už vydané kusy zůstávají vydané.' : 'Objednávka se znovu otevře.', on ? 'Stornovat' : 'Obnovit').then(function(ok){
+    if (!ok) return; return save(B.update([orderUpdate(o, { stav: on ? 'storno' : (o.vyB ? 'vydano' : (o.prB ? 'pripraveno' : 'nova')) })]), on ? 'Stornováno' : 'Obnoveno');
+  });
+}
+function actSize(o, itemId, sz){
+  var it = o.items.filter(function(i){ return i.id === itemId; })[0]; if (!it) return;
+  return save(B.update([itemUpdate(it, { velikost: sz })]));
+}
+function actNote(o, txt){ return save(B.update([orderUpdate(o, { poznamka_personal: txt })]), 'Poznámka uložena'); }
+
+/* ================================ UI ===================================== */
+function confirmBox(title, text, okLabel){
+  return new Promise(function(res){
+    var host = document.getElementById('ovHost'), d = document.createElement('div');
+    d.className = 'ov'; d.style.zIndex = 70; d.style.alignItems = 'center'; d.style.padding = '20px';
+    d.innerHTML = '<div class="card" style="max-width:420px;width:100%;margin:0"><h3 style="margin:0 0 8px">' + esc(title) + '</h3><div class="muted" style="white-space:pre-line;margin-bottom:16px">' + esc(text) + '</div>' +
+      '<div class="row"><button class="btn" data-no>Zpět</button><button class="btn pri" data-yes>' + esc(okLabel || 'OK') + '</button></div></div>';
+    host.appendChild(d);
+    function close(v){ d.remove(); res(v); }
+    d.querySelector('[data-no]').onclick = function(){ close(false); };
+    d.querySelector('[data-yes]').onclick = function(){ close(true); };
+    d.onclick = function(e){ if (e.target === d) close(false); };
+  });
+}
+function openSheet(html){ var h = document.getElementById('ovHost'); var ex = h.querySelector('.ov.main'); if (ex) { ex.querySelector('.sheet').innerHTML = '<div class="grab"></div>' + html; return; }
+  var d = document.createElement('div'); d.className = 'ov main'; d.innerHTML = '<div class="sheet"><div class="grab"></div>' + html + '</div>';
+  d.onclick = function(e){ if (e.target === d) closeSheet(); }; h.appendChild(d); }
+function closeSheet(){ var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; }
+
+function isAdmin(){ return role === 'admin'; }
+function countOpenProblems(){ return M.orders ? M.orders.filter(function(o){ return o.problem; }).length : 0; }
+function lowList(){
+  var out = [];
+  ITEMS.forEach(function(it){ ALLSIZES.forEach(function(sz){
+    var mn = M.min[it + '|' + sz] || 0, f = freeOf(it, sz);
+    if (mn > 0 && f < mn) out.push({ item: it, size: sz, free: f, min: mn, need: mn - f });
+  }); });
+  return out;
+}
+
+function renderTop(){
+  var el = document.getElementById('top'); if (!el) return;
+  var b = el.querySelector('[data-act=refresh]'); if (b) b.classList.toggle('spin', !!UI.busy);
+}
+function shell(){
+  return '<div id="app"><header class="top" id="top"><img src="logo.png" alt=""><div class="t">Sklad oblečení<small>' + esc(DEMO ? 'DEMO režim' : 'FK Slovany Pardubice') + '</small></div><div class="sp"></div>' +
+    '<button class="ibtn" data-act="refresh" title="Obnovit">' + ICON.refresh + '</button><button class="ibtn" data-act="signout" title="Odhlásit">' + ICON.out2 + '</button></header>' +
+    '<main id="main"></main></div><nav class="bottom"><div class="in" id="nav"></div></nav>';
+}
+function renderNav(){
+  var tabs = [['orders','Objednávky',ICON.list],['vydej','Výdej',ICON.out],['sklad','Sklad',ICON.box],['prijem','Příjem',ICON.in]];
+  if (isAdmin()) tabs.push(['settings','Nastavení',ICON.cog]);
+  var low = M.loaded && !M.needSetup ? lowList().length : 0, pr = M.loaded && !M.needSetup ? countOpenProblems() : 0;
+  document.getElementById('nav').innerHTML = tabs.map(function(t){
+    var badge = t[0] === 'sklad' && low ? '<span class="dot" style="background:var(--amber);color:#1a1200">' + low + '</span>' : (t[0] === 'orders' && pr ? '<span class="dot">' + pr + '</span>' : '');
+    return '<button data-act="tab" data-tab="' + t[0] + '" class="' + (UI.tab === t[0] ? 'on' : '') + '">' + t[2] + t[1] + badge + '</button>';
+  }).join('');
+}
+function renderAll(){
+  var main = document.getElementById('main'); if (!main) return;
+  renderNav(); renderTop();
+  if (!M.loaded) { main.innerHTML = '<div class="empty">Načítám…</div>'; return; }
+  if (M.needSetup) { main.innerHTML = setupView(); return; }
+  var v = { orders: ordersView, vydej: vydejView, sklad: skladView, prijem: prijemView, settings: settingsView }[UI.tab] || ordersView;
+  var scroll = window.scrollY, active = document.activeElement, keep = active && active.id === 'q' ? active.selectionStart : null;
+  main.innerHTML = v();
+  var q = document.getElementById('q'); if (q && keep !== null) { q.focus(); try { q.setSelectionRange(keep, keep); } catch(e){} }
+  if (UI.openOrder) renderOrderSheet();
+}
+function setupView(){
+  if (!isAdmin()) return '<div class="empty">Databáze ještě není připravená.<br>Požádejte administrátora, ať aplikaci jednou otevře.</div>';
+  return '<div class="card"><h2>Prvotní nastavení</h2><p class="muted">Databáze (Google tabulka) je zatím prázdná. Tlačítkem vytvoříte potřebné listy a nahrajete počáteční stav skladu, minima, katalog, sety a šablony e-mailů.</p><button class="btn pri blk" data-act="setup">Připravit databázi</button></div>';
+}
+
+/* ---------- Objednávky ---------- */
+function orderState(o){ return o.stav === 'storno' ? 'storno' : (o.vyB ? 'vydano' : (o.prB ? 'pripraveno' : 'nova')); }
+function filterOrders(){
+  var f = UI.filter, q = norm(UI.q);
+  return M.orders.filter(function(o){
+    if (q && norm(o.hrac + ' ' + o.kategorie + ' ' + o.email).indexOf(q) === -1) return false;
+    var open = isOpen(o);
+    switch (f) {
+      case 'open': return open;
+      case 'pay': return open && !o.kisB;
+      case 'prep': return open && o.kisB && !o.prB;
+      case 'ready': return open && o.prB;
+      case 'problem': return o.problem;
+      case 'done': return o.vyB && o.stav !== 'storno';
+      case 'cancel': return o.stav === 'storno';
+      default: return true;
+    }
+  });
+}
+function ordersView(){
+  var cnt = function(fn){ return M.orders.filter(fn).length; };
+  var chips = [['open','K vyřízení',cnt(isOpen)],['pay','Čeká na KIS',cnt(function(o){return isOpen(o)&&!o.kisB;})],['prep','K přípravě',cnt(function(o){return isOpen(o)&&o.kisB&&!o.prB;})],
+    ['ready','Připraveno',cnt(function(o){return isOpen(o)&&o.prB;})],['problem','Problémy',countOpenProblems()],['done','Vydáno',cnt(function(o){return o.vyB&&o.stav!=='storno';})],['all','Vše',M.orders.length]];
+  var list = filterOrders();
+  return '<div class="search">' + ICON.search + '<input id="q" type="search" placeholder="Hledat hráče…" value="' + esc(UI.q) + '" data-input="q"></div>' +
+    '<div class="chips">' + chips.map(function(c){ return '<button class="chip ' + (UI.filter === c[0] ? 'on' : '') + '" data-act="filter" data-f="' + c[0] + '">' + c[1] + '<span class="n">' + c[2] + '</span></button>'; }).join('') + '</div>' +
+    (UI.importInfo ? '<div class="mini" style="margin-bottom:8px">' + esc(UI.importInfo) + '</div>' : '') +
+    (list.length ? list.map(orderCard).join('') : '<div class="empty">Žádné objednávky.</div>');
+}
+function orderCard(o){
+  var st = orderState(o), bs = [];
+  bs.push('<span class="b ' + (o.kisB ? 'ok' : 'warn') + '">' + (o.kisB ? '✓ KIS' : 'KIS čeká') + '</span>');
+  if (st === 'storno') bs.push('<span class="b bad">Storno</span>');
+  else { bs.push('<span class="b ' + (o.prB ? 'acc' : '') + '">' + (o.prB ? '✓ Připraveno' : 'Nepřipraveno') + '</span>'); if (o.vyB) bs.push('<span class="b ok">✓ Vydáno</span>'); }
+  if (o.warnSize) bs.push('<span class="b bad">Chybí velikost</span>');
+  if (o.warnShort) bs.push('<span class="b bad">Chybí na skladě</span>');
+  if (o.noItems) bs.push('<span class="b bad">Neznámý set</span>');
+  var partial = o.items.some(function(i){ return i.vydano_ks > 0; }) && !o.vyB; if (partial) bs.push('<span class="b warn">Částečně vydáno</span>');
+  return '<button class="ord s-' + st + '" data-act="open" data-id="' + esc(o.id) + '"><div class="r1"><span class="nm">' + esc(o.hrac) + '</span><span class="pr">' + kc(o.cena) + '</span></div>' +
+    '<div class="r2">' + esc(o.typ_setu) + (o.extra ? ' + ' + esc(o.extra.replace(/\s*[–-]\s*\d[\d\s]*Kč/g, '')) : '') + (o.kategorie ? ' · ' + esc(o.kategorie) : '') + ' · ' + fmtD(o.cas) + '</div><div class="badges">' + bs.join('') + '</div></button>';
+}
+function renderOrderSheet(){
+  var o = M.orders.filter(function(x){ return x.id === UI.openOrder; })[0]; if (!o) { closeSheet(); return; }
+  var open = isOpen(o), anyRem = o.items.some(function(i){ return i.ks - i.vydano_ks > 0; }), anyDone = o.items.some(function(i){ return i.vydano_ks > 0; });
+  var its = o.items.map(function(i){
+    var rem = i.ks - i.vydano_ks, chip;
+    if (rem <= 0) chip = '<span class="b ok">Vydáno</span>';
+    else if (i._nosize) chip = '<span class="b bad">Chybí velikost</span>';
+    else if (i._short) chip = '<span class="b bad">Chybí</span>';
+    else chip = '<span class="b ok">Skladem</span>';
+    var sel = NOSIZE[i.item] ? '<span class="muted">–</span>' : '<select class="in" data-change="size" data-iid="' + esc(i.id) + '"' + (rem <= 0 ? ' disabled' : '') + '><option value="">?</option>' +
+      SIZES.map(function(s){ return '<option' + (s === i.velikost ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>';
+    var canPick = rem > 0 && o.stav !== 'storno';
+    return '<div class="it"><input type="checkbox" data-pick value="' + esc(i.id) + '"' + (canPick ? ' checked' : ' disabled') + '><div><div class="nm">' + (i.ks > 1 ? i.ks + '× ' : '') + esc(i.item) + '</div><div class="sub">' + chip + (i.puvod === 'extra' ? ' <span class="mini">navíc</span>' : '') + '</div></div>' + sel + '</div>';
+  }).join('');
+  openSheet('<h3>' + esc(o.hrac) + '</h3><div class="mini">' + esc(o.kategorie) + ' · ' + fmtDT(o.cas) + '</div>' +
+    '<div class="card" style="margin-top:12px"><div class="kv"><span class="muted">Objednávka</span><span>' + esc(o.typ_setu) + '</span></div>' +
+    (o.extra ? '<div class="kv"><span class="muted">Navíc</span><span style="text-align:right">' + esc(o.extra) + '</span></div>' : '') +
+    '<div class="kv"><span class="muted">Cena</span><b>' + kc(o.cena) + '</b></div><div class="kv"><span class="muted">E-mail</span><span>' + (o.email ? '<a style="color:var(--accent)" href="mailto:' + esc(o.email) + '">' + esc(o.email) + '</a>' : '<span class="neg">chybí</span>') + '</span></div>' +
+    (o.poznamka ? '<div class="kv"><span class="muted">Poznámka</span><span style="text-align:right">' + esc(o.poznamka) + '</span></div>' : '') + '</div>' +
+    '<div class="tg"><div class="l">Zaplaceno v KIS</div><button class="sw ' + (o.kisB ? 'on' : '') + '" data-act="kis" aria-label="KIS"></button></div>' +
+    '<div class="tg"><div class="l">Připraveno k vyzvednutí<small>' + (o.prB ? esc(fmtDT(o.pripraveno_cas)) + ' ' + esc(o.pripraveno_kdo) : 'odešle e-mail rodiči') + '</small></div><button class="sw ' + (o.prB ? 'on' : '') + '" data-act="prip" aria-label="Připraveno"' + (o.stav === 'storno' ? ' disabled' : '') + '></button></div>' +
+    '<div class="sect">Položky' + (o.vyB ? ' – vydáno ' + fmtDT(o.vydano_cas) : '') + '</div>' + (its || '<div class="muted">Žádné položky (neznámý typ setu). Doplňte ručně v databázi.</div>') +
+    (anyRem && o.stav !== 'storno' ? '<button class="btn pri blk" style="margin-top:12px" data-act="vydat">Vydat vybrané</button>' : '') +
+    (anyDone ? '<button class="btn blk" style="margin-top:8px" data-act="vratit">Vrátit výdej</button>' : '') +
+    '<label class="f">Poznámka (personál)</label><textarea class="in" id="pn" placeholder="Interní poznámka…">' + esc(o.poznamka_personal) + '</textarea><button class="btn blk" style="margin-top:8px" data-act="note">Uložit poznámku</button>' +
+    '<div class="row" style="margin-top:14px"><button class="btn red" data-act="storno">' + (o.stav === 'storno' ? 'Obnovit objednávku' : 'Stornovat') + '</button><button class="btn" data-act="closeSheet">Zavřít</button></div>');
+}
+
+/* ---------- Výdej ---------- */
+function vydejView(){
+  var seg = '<div class="seg"><button data-act="vmode" data-m="orders" class="' + (UI.vydejMode === 'orders' ? 'on' : '') + '">Objednávky</button><button data-act="vmode" data-m="free" class="' + (UI.vydejMode === 'free' ? 'on' : '') + '">Mimo objednávku</button></div>';
+  if (UI.vydejMode === 'free') {
+    var its = ITEMS.map(function(i){ return '<option>' + i + '</option>'; }).join('');
+    return seg + '<div class="card"><label class="f" style="margin-top:0">Komu (jméno)</label><input class="in" id="fn" placeholder="Jméno hráče / příjemce">' +
+      '<div class="row"><div><label class="f">Položka</label><select class="in" id="fi" data-change="fi">' + its + '</select></div><div><label class="f">Velikost</label><select class="in" id="fs">' + sizeOptions('Triko') + '</select></div><div style="max-width:90px"><label class="f">Ks</label><input class="in" id="fk" type="number" min="1" value="1" inputmode="numeric"></div></div>' +
+      '<label class="f">Poznámka</label><input class="in" id="fp" placeholder="Nepovinné"><button class="btn pri blk" style="margin-top:14px" data-act="freeOut">Vydat</button></div>' + recentMoves('VYDEJ', 8, true);
+  }
+  var q = norm(UI.q), list = M.orders.filter(function(o){ return isOpen(o) && o.stav !== 'storno' && (!q || norm(o.hrac).indexOf(q) !== -1); })
+    .sort(function(a,b){ return (b.prB - a.prB) || (String(a.cas) < String(b.cas) ? -1 : 1); });
+  return seg + '<div class="search">' + ICON.search + '<input id="q" type="search" placeholder="Hledat hráče k výdeji…" value="' + esc(UI.q) + '" data-input="q"></div>' +
+    (list.length ? list.map(orderCard).join('') : '<div class="empty">Žádné otevřené objednávky k výdeji.</div>');
+}
+function sizeOptions(item){ return (NOSIZE[item] ? ['-'] : SIZES).map(function(s){ return '<option>' + s + '</option>'; }).join(''); }
+function recentMoves(typ, n, free){
+  var l = M.moves.filter(function(m){ return typ ? m.typ === typ && (!free || !m.order_id) : true; }).slice().sort(function(a,b){ return String(a.cas) < String(b.cas) ? 1 : -1; }).slice(0, n);
+  if (!l.length) return '';
+  return '<div class="sect">Poslední pohyby</div>' + l.map(moveLine).join('');
+}
+function moveLine(m){
+  var k = num(m.ks), names = { POC:'Počáteční stav', PRIJEM:'Příjem', VYDEJ:'Výdej', KOREKCE:'Korekce', VRACENI:'Vrácení' };
+  return '<div class="card" style="padding:10px 14px;display:flex;justify-content:space-between;gap:10px"><div><b>' + esc(m.item) + (m.velikost && m.velikost !== '-' ? ' ' + esc(m.velikost) : '') + '</b><div class="mini">' + (names[m.typ] || m.typ) + ' · ' + fmtDT(m.cas) + (m.poznamka ? ' · ' + esc(m.poznamka) : '') + '</div></div><b class="' + (k < 0 ? 'neg' : 'pos') + '">' + (k > 0 ? '+' : '') + k + '</b></div>';
+}
+
+/* ---------- Sklad ---------- */
+function skladView(){
+  var low = lowList();
+  var chips = ITEMS.map(function(i){ return '<button class="chip ' + (UI.skladItem === i ? 'on' : '') + '" data-act="sitem" data-i="' + esc(i) + '">' + esc(i) + '</button>'; }).join('');
+  var it = UI.skladItem, sizes = NOSIZE[it] ? ['-'] : SIZES;
+  var rows = sizes.map(function(s){
+    var k = it + '|' + s, fy = M.stock[k] || 0, rz = M.reserved[k] || 0, fr = fy - rz, mn = M.min[k] || 0;
+    if (!fy && !rz && !mn) return '';
+    var cls = fr < 0 ? 'neg' : (mn && fr < mn ? 'low' : '');
+    return '<tr class="' + cls + '"><td>' + (s === '-' ? 'ks' : s) + '</td><td>' + fy + '</td><td class="wr">' + (rz || '') + '</td><td class="v ' + (fr < 0 ? 'neg' : '') + '">' + fr + '</td><td class="muted">' + (mn || '') + '</td></tr>';
+  }).join('');
+  var lowHtml = low.length ? '<div class="card"><div class="sect" style="margin-top:0">Pod minimem – doporučeno doobjednat</div>' +
+    ITEMS.map(function(it){
+      var l = low.filter(function(x){ return x.item === it; }); if (!l.length) return '';
+      var tot = l.reduce(function(a, x){ return a + x.need; }, 0);
+      return '<div class="kv" style="align-items:flex-start"><span><b>' + esc(it) + '</b><div class="mini" style="margin-top:3px">' + l.map(function(x){ return (x.size === '-' ? 'ks' : x.size) + ' <b class="wr">+' + x.need + '</b>'; }).join(' · ') + '</div></span><span class="wr"><b>+' + tot + '</b></span></div>';
+    }).join('') + '</div>' : '<div class="card muted">Všechny položky jsou nad minimem.</div>';
+  return '<h2>Sklad</h2>' + lowHtml + '<div class="chips">' + chips + '</div><div class="card"><table class="t"><tr><th>Velikost</th><th>Fyzicky</th><th>Rezerv.</th><th>Volné</th><th>Min.</th></tr>' + (rows || '<tr><td colspan="5" class="muted">Nic skladem.</td></tr>') + '</table></div>' +
+    '<div class="sect">Historie – ' + esc(it) + '</div>' + (M.moves.filter(function(m){ return m.item === it; }).sort(function(a,b){ return String(a.cas) < String(b.cas) ? 1 : -1; }).slice(0, 15).map(moveLine).join('') || '<div class="muted">Bez pohybů.</div>');
+}
+
+/* ---------- Příjem ---------- */
+function prijemView(){
+  var its = ITEMS.map(function(i){ return '<option>' + i + '</option>'; }).join('');
+  var adm = isAdmin() ? '<div class="sect">Korekce stavu (inventura)</div><div class="card"><div class="row"><div><label class="f" style="margin-top:0">Položka</label><select class="in" id="ci" data-change="ci">' + its + '</select></div><div><label class="f" style="margin-top:0">Velikost</label><select class="in" id="cs">' + sizeOptions('Triko') + '</select></div></div>' +
+    '<label class="f">Skutečný stav (ks)</label><input class="in" id="cn" type="number" min="0" inputmode="numeric" placeholder="Kolik kusů je fyzicky na skladě"><button class="btn blk" style="margin-top:12px" data-act="korekce">Nastavit stav</button></div>' : '';
+  return '<h2>Příjem zboží</h2><div class="card"><div class="row"><div><label class="f" style="margin-top:0">Položka</label><select class="in" id="ri" data-change="ri">' + its + '</select></div><div><label class="f" style="margin-top:0">Velikost</label><select class="in" id="rs">' + sizeOptions('Triko') + '</select></div><div style="max-width:90px"><label class="f" style="margin-top:0">Ks</label><input class="in" id="rk" type="number" min="1" value="1" inputmode="numeric"></div></div>' +
+    '<label class="f">Poznámka</label><input class="in" id="rp" placeholder="např. dodací list"><button class="btn pri blk" style="margin-top:14px" data-act="receive">Přijmout na sklad</button></div>' + adm + recentMoves('', 0) +
+    (function(){ var l = M.moves.filter(function(m){ return m.typ === 'PRIJEM' || m.typ === 'KOREKCE'; }).sort(function(a,b){ return String(a.cas) < String(b.cas) ? 1 : -1; }).slice(0, 10); return l.length ? '<div class="sect">Poslední příjmy a korekce</div>' + l.map(moveLine).join('') : ''; })();
+}
+
+/* ---------- Nastavení (admin) ---------- */
+function settingsView(){
+  var minHtml = ITEMS.map(function(it){
+    var sz = NOSIZE[it] ? ['-'] : SIZES;
+    return '<div class="card"><b>' + esc(it) + '</b><div style="display:grid;grid-template-columns:repeat(' + (NOSIZE[it] ? 1 : 3) + ',1fr);gap:8px;margin-top:8px">' + sz.map(function(s){
+      return '<div><label class="f" style="margin:0 0 3px">' + (s === '-' ? 'ks' : s) + '</label><input class="in" style="height:38px;text-align:center" type="number" min="0" inputmode="numeric" data-min="' + esc(it + '|' + s) + '" value="' + (M.min[it + '|' + s] || 0) + '"></div>'; }).join('') + '</div></div>';
+  }).join('');
+  var em = ['objednavka','pripraveno','vydano'].map(function(k){ var e = M.emails[k] || {}; return '<div class="card"><b>' + esc(k) + '</b> <span class="mini">' + esc(e.popis || '') + '</span><label class="f">Předmět</label><input class="in" data-em="' + k + '|predmet" value="' + esc(e.predmet || '') + '"><label class="f">Text</label><textarea class="in" style="min-height:150px" data-em="' + k + '|text">' + esc(e.text || '') + '</textarea></div>'; }).join('');
+  var cat = M.catalog.map(function(c){ return '<div class="kv"><span>' + esc(c.nazev) + ' <span class="mini">(' + esc(c.typ) + ')</span></span><span style="width:110px"><input class="in" style="height:36px;text-align:right" type="number" min="0" data-cat="' + esc(c.id) + '" value="' + esc(c.cena) + '" placeholder="Kč"></span></div>'; }).join('');
+  return '<h2>Nastavení</h2><div class="sect">Vyzvednutí a e-maily</div><div class="card"><label class="f" style="margin-top:0">Místo a čas vyzvednutí (dosadí se do e-mailu)</label><input class="in" data-set="misto_vyzvednuti" value="' + esc(M.settings.misto_vyzvednuti || '') + '">' +
+    '<label class="f">Odesílatel e-mailů</label><input class="in" data-set="email_odesilatel" value="' + esc(M.settings.email_odesilatel || '') + '">' +
+    '<label class="f">Ignorovat jména při importu (oddělte svislítkem |)</label><input class="in" data-set="ignorovat_jmena" value="' + esc(M.settings.ignorovat_jmena || '') + '"><button class="btn pri blk" style="margin-top:12px" data-act="saveSettings">Uložit</button></div>' +
+    '<div class="sect">Minimální stav skladu</div>' + minHtml + '<button class="btn pri blk" data-act="saveMin">Uložit minima</button>' +
+    '<div class="sect">Katalog – ceny (informativní)</div><div class="card">' + cat + '</div><button class="btn blk" data-act="saveCat">Uložit ceny</button>' +
+    '<div class="sect">Šablony e-mailů</div>' + em + '<button class="btn pri blk" data-act="saveEm">Uložit šablony</button>' +
+    '<div class="sect">O aplikaci</div><div class="card mini">Verze: ' + esc(APP_VERSION) + '<br>Přihlášen: ' + esc(userEmail) + ' (' + role + ')<br>Zdroj objednávek: původní tabulka „oblečení“ (list ' + esc(M.settings.zdroj_list || '') + ')</div>';
+}
+function saveSettingsFrom(sel, tab, keyAttr){ /* (nepoužito) */ }
+function patchKV(tab, keyCol, key, valCol, val){
+  var rows = tab === 'Nastaveni' ? M.settingRows : M.emailRows, r = rows.filter(function(x){ return x[keyCol] === key; })[0];
+  if (r) { r[valCol] = val; return { tab: tab, row: r._row, values: toRow(tab, r) }; }
+  var n = {}; n[keyCol] = key; n[valCol] = val; return null;
+}
+
+/* ============================== EVENTY =================================== */
+document.addEventListener('click', function(e){
+  var t = e.target.closest('[data-act]'); if (!t) return;
+  var a = t.getAttribute('data-act'), o = UI.openOrder ? M.orders.filter(function(x){ return x.id === UI.openOrder; })[0] : null;
+  switch (a) {
+    case 'tab': UI.tab = t.getAttribute('data-tab'); UI.q = ''; closeSheet(); window.scrollTo(0, 0); renderAll(); break;
+    case 'filter': UI.filter = t.getAttribute('data-f'); renderAll(); break;
+    case 'vmode': UI.vydejMode = t.getAttribute('data-m'); renderAll(); break;
+    case 'sitem': UI.skladItem = t.getAttribute('data-i'); renderAll(); break;
+    case 'refresh': refresh(); break;
+    case 'signout': signOut(); break;
+    case 'open': UI.openOrder = t.getAttribute('data-id'); renderOrderSheet(); break;
+    case 'closeSheet': closeSheet(); break;
+    case 'kis': if (o) actKis(o); break;
+    case 'prip': if (o) actPripraveno(o); break;
+    case 'vydat': if (o) { var ids = [].slice.call(document.querySelectorAll('#ovHost [data-pick]:checked')).map(function(x){ return x.value; }); actVydat(o, ids); } break;
+    case 'vratit': if (o) actVratit(o); break;
+    case 'storno': if (o) actStorno(o); break;
+    case 'note': if (o) actNote(o, document.getElementById('pn').value); break;
+    case 'setup': save(B.setup(), 'Databáze připravena').then(function(){ return refresh(); }); break;
+    case 'freeOut': freeOut(); break;
+    case 'receive': receive(); break;
+    case 'korekce': korekce(); break;
+    case 'saveSettings': saveSettings(); break;
+    case 'saveMin': saveMin(); break;
+    case 'saveCat': saveCat(); break;
+    case 'saveEm': saveEm(); break;
+  }
+});
+document.addEventListener('input', function(e){
+  var t = e.target; if (t.getAttribute && t.getAttribute('data-input') === 'q') { UI.q = t.value; renderAll(); }
+});
+document.addEventListener('change', function(e){
+  var t = e.target, c = t.getAttribute && t.getAttribute('data-change'); if (!c) return;
+  var o = UI.openOrder ? M.orders.filter(function(x){ return x.id === UI.openOrder; })[0] : null;
+  if (c === 'size' && o) actSize(o, t.getAttribute('data-iid'), t.value);
+  var map = { fi: 'fs', ri: 'rs', ci: 'cs' };
+  if (map[c]) document.getElementById(map[c]).innerHTML = sizeOptions(t.value);
+});
+
+function freeOut(){
+  var name = document.getElementById('fn').value.trim(), item = document.getElementById('fi').value, sz = document.getElementById('fs').value, n = Math.max(1, parseInt(document.getElementById('fk').value, 10) || 1), p = document.getElementById('fp').value.trim();
+  if (!name) { toast('Vyplňte jméno příjemce.', 'err'); return; }
+  if ((M.stock[item + '|' + sz] || 0) < n) { toast('Tolik kusů není fyzicky skladem.', 'err'); return; }
+  confirmBox('Vydat mimo objednávku?', n + '× ' + item + (sz === '-' ? '' : ' ' + sz) + ' → ' + name, 'Vydat').then(function(ok){
+    if (!ok) return; save(B.append('Pohyby', [moveRow('VYDEJ', item, sz, -n, '', 'Mimo objednávku – ' + name + (p ? ' – ' + p : ''))]), 'Vydáno');
+  });
+}
+function receive(){
+  var item = document.getElementById('ri').value, sz = document.getElementById('rs').value, n = parseInt(document.getElementById('rk').value, 10) || 0, p = document.getElementById('rp').value.trim();
+  if (n < 1) { toast('Zadejte počet kusů.', 'err'); return; }
+  save(B.append('Pohyby', [moveRow('PRIJEM', item, sz, n, '', p || 'Příjem zboží')]), 'Přijato: ' + n + '× ' + item + (sz === '-' ? '' : ' ' + sz));
+}
+function korekce(){
+  var item = document.getElementById('ci').value, sz = document.getElementById('cs').value, v = document.getElementById('cn').value;
+  if (v === '') { toast('Zadejte skutečný stav.', 'err'); return; }
+  var target = parseInt(v, 10), cur = M.stock[item + '|' + sz] || 0, d = target - cur;
+  if (!d) { toast('Stav už odpovídá.', 'ok'); return; }
+  confirmBox('Upravit stav skladu?', item + (sz === '-' ? '' : ' ' + sz) + ': ' + cur + ' → ' + target + ' ks (' + (d > 0 ? '+' : '') + d + ')', 'Nastavit').then(function(ok){
+    if (ok) save(B.append('Pohyby', [moveRow('KOREKCE', item, sz, d, '', 'Inventura: ' + cur + ' → ' + target)]), 'Stav upraven');
+  });
+}
+function upsertKV(tab, rows, keyCol, key, valCol, val){
+  var r = rows.filter(function(x){ return x[keyCol] === key; })[0];
+  if (r) { r[valCol] = val; return { upd: { tab: tab, row: r._row, values: toRow(tab, r) } }; }
+  var n = {}; n[keyCol] = key; n[valCol] = val; return { add: toRow(tab, n) };
+}
+function saveSettings(){
+  var ups = [], adds = [];
+  [].forEach.call(document.querySelectorAll('[data-set]'), function(i){ var r = upsertKV('Nastaveni', M.settingRows, 'klic', i.getAttribute('data-set'), 'hodnota', i.value.trim()); if (r.upd) ups.push(r.upd); else adds.push(r.add); });
+  save(B.update(ups).then(function(){ return B.append('Nastaveni', adds); }), 'Nastavení uloženo');
+}
+function saveMin(){
+  var ups = [];
+  M.minRows.forEach(function(r){ var changed = false; [].forEach.call(document.querySelectorAll('[data-min]'), function(i){ var p = i.getAttribute('data-min').split('|'); if (p[0] === r.item) { r[p[1]] = Math.max(0, parseInt(i.value, 10) || 0); changed = true; } }); if (changed) ups.push({ tab:'Minima', row:r._row, values: toRow('Minima', r) }); });
+  save(B.update(ups), 'Minima uložena');
+}
+function saveCat(){
+  var ups = []; [].forEach.call(document.querySelectorAll('[data-cat]'), function(i){ var c = M.catalog.filter(function(x){ return x.id === i.getAttribute('data-cat'); })[0]; if (c) { c.cena = i.value === '' ? '' : num(i.value); ups.push({ tab:'Katalog', row:c._row, values: toRow('Katalog', c) }); } });
+  save(B.update(ups), 'Ceny uloženy');
+}
+function saveEm(){
+  var ups = []; ['objednavka','pripraveno','vydano'].forEach(function(k){ var r = M.emails[k]; if (!r) return;
+    [].forEach.call(document.querySelectorAll('[data-em^="' + k + '|"]'), function(i){ r[i.getAttribute('data-em').split('|')[1]] = i.value; }); ups.push({ tab:'Emaily', row:r._row, values: toRow('Emaily', r) }); });
+  save(B.update(ups), 'Šablony uloženy');
+}
+
+/* =============================== PŘIHLÁŠENÍ ============================== */
+var tokenClient = null, LAST_KEY = 'sklad_last_email';
+function gisReady(){ return window.google && google.accounts && google.accounts.oauth2; }
+function showLogin(msg){
+  document.getElementById('root').innerHTML = '<div class="login"><img src="logo.png" alt=""><h2 style="margin:0">Sklad oblečení</h2><div class="muted">FK Slovany Pardubice</div>' +
+    '<button class="btn pri" id="siBtn" style="min-width:240px">Přihlásit se přes Google</button><div class="err" id="siErr">' + esc(msg || '') + '</div></div>';
+  document.getElementById('siBtn').onclick = signIn;
+}
+function ensureClient(){
+  if (tokenClient) return tokenClient;
+  tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CONFIG.CLIENT_ID, scope: CONFIG.SCOPES, callback: function(resp){
+    if (resp.error) { var e = document.getElementById('siErr'); if (e) e.textContent = 'Přihlášení selhalo: ' + resp.error; return; }
+    token = resp.access_token; afterSignIn();
+  } });
+  return tokenClient;
+}
+function signIn(){
+  if (!gisReady()) { var e = document.getElementById('siErr'); if (e) e.textContent = 'Google přihlášení se ještě načítá, zkuste to za chvíli.'; return; }
+  ensureClient().requestAccessToken({ prompt: 'select_account' });
+}
+function trySilent(){
+  var saved = null; try { saved = localStorage.getItem(LAST_KEY); } catch (e) {}
+  if (!saved) return;
+  var n = 0; (function attempt(){
+    if (gisReady()) {
+      ensureClient().requestAccessToken({ prompt: '', hint: saved });
+    } else if (++n < 30) setTimeout(attempt, 200);
+  })();
+}
+function signOut(){
+  if (DEMO) { location.href = location.pathname; return; }
+  try { if (token && gisReady()) google.accounts.oauth2.revoke(token, function(){}); } catch (e) {}
+  token = null; try { localStorage.removeItem(LAST_KEY); } catch (e) {} showLogin();
+}
+function afterSignIn(){
+  document.getElementById('root').innerHTML = '<div class="empty">Ověřuji přístup…</div>';
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(function(r){ return r.json(); }).then(function(u){
+    userEmail = (u.email || '').toLowerCase();
+    role = CONFIG.ADMIN_EMAILS.indexOf(userEmail) !== -1 ? 'admin' : (CONFIG.STAFF_EMAILS.indexOf(userEmail) !== -1 ? 'staff' : null);
+    if (!role) { document.getElementById('root').innerHTML = '<div class="login"><img src="logo.png" alt=""><h3>Přístup odepřen</h3><div class="muted">Účet ' + esc(userEmail) + ' nemá k aplikaci přístup.</div><button class="btn" id="so">Odhlásit</button></div>'; document.getElementById('so').onclick = signOut; return; }
+    try { localStorage.setItem(LAST_KEY, userEmail); } catch (e) {}
+    start();
+  }).catch(function(e){ showLogin('Nepodařilo se ověřit účet: ' + e.message); });
+}
+function start(){
+  document.getElementById('root').innerHTML = shell(); renderAll(); refresh();
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden && M.loaded && !UI.busy && Date.now() - (UI.last || 0) > 60000) { UI.last = Date.now(); refresh(); } });
+  UI.last = Date.now();
+}
+(function boot(){
+  if (DEMO) { DemoB.init(); userEmail = 'demo@demo'; role = /[?&]role=staff/.test(location.search) ? 'staff' : 'admin'; start(); return; }
+  showLogin(); trySilent();
+})();
+</script>
+</body>
+</html>
