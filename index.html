@@ -27,7 +27,7 @@ header.top .sp{flex:1}
 @keyframes sp{to{transform:rotate(360deg)}}
 main{padding:14px 16px}
 nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:#12161b;border:0;box-shadow:none;outline:0;padding-bottom:max(env(safe-area-inset-bottom),18px)}
-nav.bottom .in{display:flex;width:100%;max-width:760px}
+nav.bottom .navin{display:flex;width:100%;max-width:760px}
 nav.bottom button{flex:1;height:var(--nav);background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;line-height:1.2;cursor:pointer;position:relative;overflow:visible}
 nav.bottom button.on{color:var(--accent)}
 nav.bottom button:focus,nav.bottom button:focus-visible,nav.bottom button:active{outline:0;box-shadow:none}
@@ -124,7 +124,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '1. 10. 2026 – lišta bez čáry';
+var APP_VERSION = '1. 10. 2026 – lišta: oprava rámečku';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -605,7 +605,7 @@ function renderTop(){
 function shell(){
   return '<div id="app"><header class="top" id="top"><img src="logo.png" alt=""><div class="t">Sklad oblečení<small>' + esc(DEMO ? 'DEMO režim' : 'FK Slovany Pardubice') + '</small></div><div class="sp"></div>' +
     '<button class="ibtn" data-act="refresh" title="Obnovit">' + ICON.refresh + '</button><button class="ibtn" data-act="signout" title="Odhlásit">' + ICON.out2 + '</button></header>' +
-    '<main id="main"></main></div><nav class="bottom"><div class="in" id="nav"></div></nav>';
+    '<main id="main"></main></div><nav class="bottom"><div class="navin" id="nav"></div></nav>';
 }
 function renderNav(){
   var tabs = [['orders','Objednávky',ICON.list],['vydej','Výdej',ICON.out],['sklad','Sklad',ICON.box],['prijem','Příjem',ICON.in]];
