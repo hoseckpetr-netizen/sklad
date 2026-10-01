@@ -26,7 +26,7 @@ header.top .sp{flex:1}
 .ibtn.spin svg{animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 main{padding:14px 16px}
-nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:#0e1114;box-shadow:0 -1px 0 var(--border);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:#0e1114;box-shadow:0 -1px 0 var(--border);padding-bottom:max(env(safe-area-inset-bottom),18px)}
 nav.bottom .in{display:flex;width:100%;max-width:760px}
 nav.bottom button{flex:1;height:var(--nav);background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;line-height:1.2;cursor:pointer;position:relative;overflow:visible}
 nav.bottom button.on{color:var(--accent)}
@@ -123,7 +123,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '1. 10. 2026 – mazání objednávek, tlačítko Zpět, lišta';
+var APP_VERSION = '1. 10. 2026 – oprava spodní lišty (rezerva dole)';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
