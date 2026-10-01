@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Objednávka oblečení – FK Slovany Pardubice</title>
+<meta name="theme-color" content="#0b0d10">
+<meta name="description" content="Sestav si klubový set FK Slovany Pardubice – vyber set, velikosti a odešli objednávku.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png?v=2" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--accent:#00FFFF;--accent2:#3b82f6;--bg:#0b0d10;--card:#1a1e23;--card2:#14181d;--border:#262b31;--text:#eef1f3;--muted:#9aa2ab;--green:#34D399;--red:#f87171;--amber:#fbbf24;
+  --glass:rgba(26,30,35,.62);--glassb:rgba(255,255,255,.08);--r:20px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',system-ui,sans-serif;font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+body{min-height:100vh;overflow-x:hidden}
+
+/* ---------- aurora pozadí ---------- */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+.bg i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;will-change:transform;animation:drift 22s ease-in-out infinite alternate}
+.bg i:nth-child(1){width:60vmax;height:60vmax;left:-20vmax;top:-22vmax;background:radial-gradient(circle,#0891b2,transparent 65%)}
+.bg i:nth-child(2){width:55vmax;height:55vmax;right:-20vmax;top:10vh;background:radial-gradient(circle,#1d4ed8,transparent 65%);animation-duration:28s;animation-delay:-6s}
+.bg i:nth-child(3){width:45vmax;height:45vmax;left:20vw;bottom:-25vmax;background:radial-gradient(circle,#00ffff55,transparent 65%);animation-duration:34s;animation-delay:-12s}
+.bg::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(ellipse at 50% 20%,#000,transparent 75%)}
+@keyframes drift{to{transform:translate3d(6vmax,4vmax,0) scale(1.12)}}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1040px;margin:0 auto;padding:0 14px calc(120px + env(safe-area-inset-bottom))}
+header.top{position:sticky;top:0;z-index:30;margin:0 -14px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:rgba(11,13,16,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--glassb)}
+.hrow{display:flex;align-items:center;gap:10px;max-width:1040px;margin:0 auto}
+.hrow img{height:30px;width:auto}
+.hrow .t{font-weight:600;font-size:13.5px;line-height:1.15}.hrow .t small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+.hrow .sp{flex:1}
+.hrow .stepn{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}.hrow .stepn b{color:var(--accent);font-weight:600}
+.rail{display:flex;gap:6px;max-width:1040px;margin:10px auto 0}
+.rail button{flex:1;border:0;background:none;padding:0;text-align:left;color:var(--muted);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.rail button i{display:block;height:4px;border-radius:2px;background:#262b31;margin-bottom:6px;position:relative;overflow:hidden}
+.rail button i::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--accent),#38bdf8);transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.rail button.done i::after,.rail button.on i::after{transform:scaleX(1)}
+.rail button.on{color:var(--accent)}.rail button.done{color:var(--text)}
+.rail button:disabled{cursor:default}
+@media(max-width:560px){.rail button span{display:none}.rail button i{margin-bottom:0}}
+
+.grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:16px;align-items:start}
+@media(min-width:900px){.grid{grid-template-columns:minmax(0,1fr) 320px}}
+.panel{background:var(--glass);border:1px solid var(--glassb);border-radius:var(--r);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:20px 18px;box-shadow:0 20px 60px -30px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.05)}
+@media(min-width:600px){.panel{padding:26px 26px}}
+.step{animation:in .45s cubic-bezier(.2,.8,.2,1)}.step.still{animation:none}
+@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 6px}
+h1,h2{margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(26px,5.4vw,40px);line-height:1.08;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(100deg,var(--accent),#38bdf8 60%,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
+.lead{color:var(--muted);margin:8px 0 0;font-size:14px;line-height:1.55;max-width:56ch}
+
+/* ---------- hero ---------- */
+.hero{position:relative;display:grid;gap:8px;overflow:hidden;margin:-20px -18px 20px;padding:26px 18px 0;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(160deg,rgba(0,255,255,.10),rgba(59,130,246,.06) 55%,transparent)}
+@media(min-width:600px){.hero{margin:-26px -26px 22px;padding:34px 26px 0;grid-template-columns:1.1fr 1fr;align-items:center}}
+.stage{position:relative;height:250px;perspective:900px}
+@media(min-width:600px){.stage{height:320px}}
+.stage::before{content:'';position:absolute;left:50%;top:52%;width:78%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(0,255,255,.28),transparent 66%);filter:blur(10px)}
+.stage .p{position:absolute;border-radius:16px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);box-shadow:0 18px 40px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.35) inset;overflow:hidden;transition:transform .25s ease-out;animation:float 6s ease-in-out infinite}
+.stage .p img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:8%}
+.stage .p:nth-child(1){left:2%;top:8%;width:36%;height:52%;--r:-7deg;animation-delay:-1s}
+.stage .p:nth-child(2){left:30%;top:0;width:30%;height:78%;--r:2deg;z-index:2;animation-delay:-3s}
+.stage .p:nth-child(3){right:2%;top:4%;width:30%;height:46%;--r:7deg;animation-delay:-2s}
+.stage .p:nth-child(4){left:10%;bottom:0;width:30%;height:38%;--r:5deg;animation-delay:-4s;z-index:3}
+.stage .p:nth-child(5){right:6%;bottom:2%;width:34%;height:46%;--r:-5deg;animation-delay:-5s;z-index:3}
+@keyframes float{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-9px) rotate(calc(var(--r) + 1.5deg))}}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 11px;border-radius:99px;border:1px solid var(--glassb);background:rgba(255,255,255,.04);color:var(--muted)}
+.pill b{color:var(--text);font-weight:600}
+
+/* ---------- pole ---------- */
+.fld{position:relative;margin-top:16px}
+.fld input,.fld textarea{width:100%;background:rgba(11,13,16,.55);border:1.5px solid var(--border);border-radius:14px;height:56px;padding:22px 14px 6px;outline:0;transition:border-color .2s,box-shadow .2s;font-size:15px}
+.fld textarea{height:auto;min-height:92px;padding-top:26px;resize:vertical}
+.fld label{position:absolute;left:15px;top:17px;color:var(--muted);pointer-events:none;transition:all .18s;font-size:14px}
+.fld input:focus,.fld textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(0,255,255,.12)}
+.fld input:focus+label,.fld input:not(:placeholder-shown)+label,.fld textarea:focus+label,.fld textarea:not(:placeholder-shown)+label{top:7px;font-size:10.5px;color:var(--accent);letter-spacing:.04em}
+.fld.bad input{border-color:var(--red);box-shadow:0 0 0 4px rgba(248,113,113,.12)}
+.hint{font-size:12px;color:var(--red);margin:6px 4px 0;min-height:0}
+.lbl{display:block;font-size:12px;color:var(--muted);margin:22px 0 8px;letter-spacing:.02em}
+.lbl.bad{color:var(--red)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--border);background:rgba(11,13,16,.45);border-radius:14px;padding:10px 13px;font-size:13px;color:var(--text);transition:all .18s;text-align:left;line-height:1.2}
+.chip small{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+.chip:hover{border-color:#3a424b}
+.chip.on{border-color:var(--accent);background:rgba(0,255,255,.1);color:var(--accent);box-shadow:0 0 0 4px rgba(0,255,255,.08)}
+.chip.on small{color:rgba(0,255,255,.7)}
+
+/* ---------- sety ---------- */
+.sets{display:grid;gap:12px;margin-top:18px}
+@media(min-width:600px){.sets{grid-template-columns:1fr 1fr}}
+.set{position:relative;text-align:left;border:1.5px solid var(--border);border-radius:18px;padding:14px;background:rgba(11,13,16,.5);transition:all .22s;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.set:hover{transform:translateY(-2px);border-color:#3a424b}
+.set.on{border-color:var(--accent);background:linear-gradient(160deg,rgba(0,255,255,.14),rgba(59,130,246,.06));box-shadow:0 0 0 4px rgba(0,255,255,.08),0 16px 40px -18px rgba(0,255,255,.5)}
+.set.tagged{padding-top:34px}
+.set .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.set .nm{font-weight:700;font-size:15px;line-height:1.2}
+.set .nm small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:3px}
+.set .pr{font-weight:700;font-size:15px;white-space:nowrap;color:var(--accent)}
+.set .pr.u{font-size:11px;font-weight:500;color:var(--muted)}
+.tick{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:grid;place-items:center;transition:all .2s;color:transparent}
+.set.on .tick,.xt.on .tick{background:var(--accent);border-color:var(--accent);color:#04201f}
+.tick svg{width:14px;height:14px}
+.thumbs{display:flex;gap:6px}
+.thumbs .th{width:42px;height:50px;border-radius:10px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;flex-shrink:0}
+.thumbs img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:4px}
+.thumbs .th.off{opacity:.18;filter:grayscale(1)}
+.badge{position:absolute;top:0;right:0;background:linear-gradient(100deg,var(--accent),#38bdf8);color:#04201f;font-size:10px;font-weight:700;padding:4px 12px 4px 14px;border-radius:0 0 0 12px;letter-spacing:.06em;text-transform:uppercase}
+
+.xgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:600px){.xgrid{grid-template-columns:repeat(3,1fr)}}
+.xt{position:relative;text-align:left;border:1.5px solid var(--border);border-radius:16px;background:rgba(11,13,16,.5);padding:8px 8px 10px;transition:all .2s;display:flex;flex-direction:column;gap:8px}
+.xt:hover{transform:translateY(-2px);border-color:#3a424b}
+.xt.on{border-color:var(--accent);box-shadow:0 0 0 4px rgba(0,255,255,.08);background:rgba(0,255,255,.07)}
+.xt .pic{aspect-ratio:1/1.05;border-radius:11px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;position:relative}
+.xt .pic img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:8%}
+.xt .tick{position:absolute;top:7px;right:7px;background:rgba(11,13,16,.55);border-color:rgba(255,255,255,.4)}
+.xt .nm{font-weight:600;font-size:12.5px;line-height:1.2;padding:0 3px}
+.xt .pr{font-size:11.5px;color:var(--muted);padding:0 3px}
+.xt.on .pr{color:var(--accent)}
+.note{display:flex;gap:10px;align-items:center;background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.2);border-radius:14px;padding:11px 14px;font-size:12.5px;color:#bff;margin-top:14px}
+
+/* ---------- velikosti ---------- */
+.items{display:grid;gap:12px;margin-top:18px}
+.sz{display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;border:1.5px solid var(--border);border-radius:18px;padding:10px;background:rgba(11,13,16,.5);transition:border-color .2s}
+@media(min-width:600px){.sz{grid-template-columns:104px 1fr}}
+.sz.ok{border-color:rgba(52,211,153,.5)}
+.sz.bad{border-color:var(--red);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.sz .pic{aspect-ratio:1/1.1;border-radius:12px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden}
+.sz .pic img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:8%}
+.sz .nm{font-weight:600;font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.sz .nm .b{font-size:10px;font-weight:600;border-radius:7px;padding:2px 7px;background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.35)}
+.sz.ok .nm .b{background:rgba(52,211,153,.1);color:var(--green);border-color:rgba(52,211,153,.4)}
+.sizes{display:flex;flex-wrap:wrap;gap:6px}
+.sizes button{min-width:44px;height:40px;padding:0 10px;border-radius:12px;border:1.5px solid var(--border);background:rgba(11,13,16,.55);font-weight:500;font-size:13px;transition:all .15s}
+.sizes button:hover{border-color:#3a424b}
+.sizes button.on{background:var(--accent);color:#04201f;border-color:var(--accent);font-weight:700;transform:scale(1.06);box-shadow:0 6px 20px -6px rgba(0,255,255,.7)}
+.same{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:12px 14px;border-radius:16px;border:1px dashed #3a424b}
+.same span{font-size:12px;color:var(--muted)}
+.same .sizes button{height:34px;min-width:40px;font-size:12px}
+
+/* ---------- shrnutí ---------- */
+.ticket{position:relative;border-radius:20px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid var(--glassb);margin-top:18px;overflow:hidden}
+.ticket .part{padding:18px}
+.ticket .perf{position:relative;height:0;border-top:2px dashed #2f363e;margin:0 14px}
+.ticket .perf::before,.ticket .perf::after{content:'';position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:#0d1014;border:1px solid var(--glassb)}
+.ticket .perf::before{left:-26px}.ticket .perf::after{right:-26px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:13px}
+.kv span:first-child{color:var(--muted)}.kv span:last-child{text-align:right;font-weight:500}
+.line{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
+.line:first-child{border-top:0}
+.line .th{width:44px;height:52px;border-radius:10px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden}
+.line .th img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:4px}
+.line .nm{font-weight:600;font-size:13.5px}.line .sub{font-size:11.5px;color:var(--muted)}
+.line .pr{font-weight:600;font-size:13px;white-space:nowrap}
+.total{display:flex;justify-content:space-between;align-items:baseline}
+.total span{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.total b{font-size:clamp(18px,5.4vw,28px);text-align:right;font-weight:800;letter-spacing:-.02em;background:linear-gradient(100deg,var(--accent),#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.consent{display:flex;gap:12px;align-items:flex-start;margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.5;cursor:pointer}
+.consent input{appearance:none;-webkit-appearance:none;width:24px;height:24px;border-radius:8px;border:1.5px solid var(--border);background:rgba(11,13,16,.55);flex-shrink:0;display:grid;place-items:center;margin:0;cursor:pointer;transition:all .15s}
+.consent input:checked{background:var(--accent);border-color:var(--accent)}
+.consent input:checked::after{content:'';width:6px;height:11px;border:solid #04201f;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.consent.bad{color:var(--red)}.consent.bad input{border-color:var(--red)}
+
+/* ---------- aside ---------- */
+aside.sum{display:none}
+@media(min-width:900px){aside.sum{display:block;position:sticky;top:112px}}
+aside.sum h3{margin:0 0 4px;font-size:14px}
+aside.sum .mini{color:var(--muted);font-size:12px;margin:0 0 12px}
+.stack{display:flex;margin:6px 0 14px;min-height:60px}
+.stack .th{width:52px;height:62px;border-radius:12px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;margin-left:-14px;box-shadow:0 8px 18px -8px rgba(0,0,0,.8),0 0 0 2px #14181d;animation:pop .35s cubic-bezier(.2,1.4,.4,1) both}
+.stack .th:first-child{margin-left:0}
+.stack img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:5px}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.empty{color:var(--muted);font-size:12.5px;padding:14px 0;text-align:center;border:1px dashed var(--border);border-radius:14px;margin-bottom:10px}
+
+/* ---------- tlačítka ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 22px;border-radius:15px;border:1.5px solid var(--border);background:rgba(26,30,35,.8);color:var(--text);font-weight:500;font-size:14.5px;transition:all .18s;position:relative;overflow:hidden}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:linear-gradient(100deg,var(--accent),#38bdf8);color:#04201f;border-color:transparent;font-weight:700;box-shadow:0 12px 30px -12px rgba(0,255,255,.8)}
+.btn.pri:hover{box-shadow:0 16px 38px -10px rgba(0,255,255,.95);transform:translateY(-1px)}
+.btn.pri::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:shine 3.6s infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn.ghost{background:none}
+.btn svg{width:18px;height:18px}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(11,13,16,.96) 55%,rgba(11,13,16,0));}
+.bar .in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:8px;border-radius:20px;background:rgba(18,22,27,.82);border:1px solid var(--glassb);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 20px 50px -20px #000}
+.bar .tot{flex:1;padding-left:10px;min-width:0}
+.bar .tot small{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.bar .tot b{font-size:clamp(13px,4vw,18px);overflow:hidden;text-overflow:ellipsis;display:block;font-weight:700;white-space:nowrap}
+.bar .tot b.u{font-size:13px;font-weight:500;color:var(--muted)}
+.bar .btn{height:46px;padding:0 18px}
+@media(max-width:380px){.bar .btn.ghost span{display:none}}
+
+/* ---------- úspěch ---------- */
+.done{text-align:center;padding:18px 0 6px}
+.ring{width:96px;height:96px;margin:0 auto 18px;position:relative}
+.ring svg{width:100%;height:100%}
+.ring circle{fill:none;stroke:var(--accent);stroke-width:4;stroke-dasharray:289;stroke-dashoffset:289;animation:draw .8s .1s forwards;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center}
+.ring path{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s .8s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.code{display:inline-block;margin:14px 0 4px;padding:8px 16px;border-radius:12px;border:1px dashed rgba(0,255,255,.5);color:var(--accent);font-weight:700;letter-spacing:.14em;background:rgba(0,255,255,.07)}
+.conf{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.conf i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(720deg);opacity:.9}}
+
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:70;background:#222831;border:1px solid var(--red);color:#fecaca;border-radius:14px;padding:11px 18px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;max-width:92vw;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.hp{position:absolute;left:-9999px;opacity:0}
+.foot{text-align:center;color:#59616a;font-size:11px;margin-top:26px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="bg"><i></i><i></i><i></i></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="hrow">
+      <img src="logo.png" alt="FK Slovany Pardubice">
+      <div class="t">Objednávka oblečení<small>FK Slovany Pardubice</small></div>
+      <div class="sp"></div>
+      <div class="stepn" id="stepn"></div>
+    </div>
+    <div class="rail" id="rail"></div>
+  </header>
+  <div class="grid">
+    <main class="panel" id="main"></main>
+    <aside class="panel sum" id="aside"></aside>
+  </div>
+  <div class="foot">© FK Slovany Pardubice · Oblečení Givova</div>
+</div>
+
+<div class="bar" id="bar"><div class="in">
+  <button class="btn ghost" id="back" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>Zpět</span></button>
+  <div class="tot"><small>Celkem</small><b id="barTot">–</b></div>
+  <button class="btn pri" id="next" type="button"></button>
+</div></div>
+<div id="toast" role="alert"></div>
+
+<script>
+'use strict';
+/* ============================== KONFIGURACE ============================== */
+var CONFIG = {
+  // Adresa nasazeného Apps Scriptu (viz apps-script-objednavka.gs). Prázdné = nouzový režim přes e-mail.
+  ENDPOINT: '',
+  TOKEN: '',
+  MAIL_TO: 'info@fkslovany.cz'
+};
+var DEMO = /[?&]demo=1/.test(location.search);
+
+/* Ceny: null = cena zatím není stanovena (zobrazí se „dle ceníku“). Upravte zde. */
+var ITEMS = [
+  { k:'Triko',               img:'triko',   price:250,  size:true,  sub:'Dres' },
+  { k:'Kraťasy',             img:'kratasy', price:250,  size:true,  sub:'Sportovní kraťasy' },
+  { k:'Tepláková souprava',  img:'teplaky', price:800,  size:true,  sub:'Mikina + kalhoty' },
+  { k:'Šusťáková bunda',     img:'sustak',  price:null, size:true,  sub:'Lehká větrovka' },
+  { k:'Zimní bunda',         img:'zimni',   price:800,  size:true,  sub:'Prošívaná s kapucí' },
+  { k:'Batoh',               img:'batoh',   price:null, size:false, sub:'Univerzální velikost' }
+];
+var ALL = ITEMS.map(function(i){ return i.k; });
+var SETS = [
+  { k:'Kompletní set',                 items: ALL, price:2300, tag:'Nejoblíbenější', sub:'Všechno, co hráč potřebuje' },
+  { k:'Set bez zimní bundy',           items: ALL.filter(function(i){ return i!=='Zimní bunda'; }), price:null, sub:'Bez zimní bundy' },
+  { k:'Set bez zimní bundy a batohu',  items: ALL.filter(function(i){ return i!=='Zimní bunda' && i!=='Batoh'; }), price:null, sub:'Bez zimní bundy a batohu' },
+  { k:'Triko a kraťasy',               items: ['Triko','Kraťasy'], price:500, sub:'Základ na zápasy' },
+  { k:'Jednotlivé kusy',               items: [], price:0, sub:'Poskládám si vlastní výběr', single:true }
+];
+var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
+var KATS = [['U7','Minipřípravka'],['U9','Mladší přípravka'],['U11','Starší přípravka'],['U13','Mladší žáci'],['U15','Starší žáci'],['U17','Mladší dorost'],['U19','Starší dorost'],['Dospělí','']];
+var KAT_FULL = { 'U7':'U7 – Minipřípravka','U9':'U9 – Mladší přípravka','U11':'U11 – Starší přípravka','U13':'U13 – Mladší žáci','U15':'U15 – Starší žáci','U17':'U17 – Mladší dorost','U19':'U19 – Starší dorost','Dospělí':'Dospělí' };
+var SIZECOL = { 'Zimní bunda':'Velikost zimní bundy','Šusťáková bunda':'Velikost šusťákové bundy','Tepláková souprava':'Velikost teplákové soupravy','Triko':'Velikost trika','Kraťasy':'Velikost kraťasů' };
+var STEPS = ['Hráč','Set','Velikosti','Shrnutí'];
+
+/* ================================ STAV =================================== */
+var S = { step:0, name:'', kat:'', email:'', base:'', extras:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false };
+var DKEY = 'sklad_objednavka_v1';
+try { var d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) ['name','kat','email','base','extras','sizes','note'].forEach(function(k){ if (d[k] != null) S[k] = d[k]; }); } catch(e){}
+function save(){ try { localStorage.setItem(DKEY, JSON.stringify({ name:S.name, kat:S.kat, email:S.email, base:S.base, extras:S.extras, sizes:S.sizes, note:S.note })); } catch(e){} }
+
+/* ================================ POMOCNÉ ================================ */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function item(k){ return ITEMS.filter(function(i){ return i.k===k; })[0]; }
+function setOf(k){ return SETS.filter(function(s){ return s.k===k; })[0]; }
+function kc(n){ return n.toLocaleString('cs-CZ').replace(/\s/g,' ') + ' Kč'; }
+function img(k){ return 'img/' + item(k).img + '.webp'; }
+var ICON = { check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>' };
+
+function baseItems(){ var s = setOf(S.base); return s ? s.items : []; }
+function chosen(){ // pořadí podle katalogu
+  var b = baseItems(), set = {}; b.concat(S.extras).forEach(function(k){ set[k] = 1; });
+  return ALL.filter(function(k){ return set[k]; });
+}
+function lineKind(k){ return baseItems().indexOf(k) !== -1 ? 'set' : 'extra'; }
+function calc(){
+  var s = setOf(S.base), total = 0, unknown = 0;
+  if (s) {
+    if (s.price != null) total += s.price;
+    else s.items.forEach(function(k){ var p = item(k).price; if (p == null) unknown++; else total += p; });
+  }
+  S.extras.forEach(function(k){ var p = item(k).price; if (p == null) unknown++; else total += p; });
+  return { total: total, unknown: unknown };
+}
+function totalText(){
+  var c = calc(); if (!S.base) return '–';
+  if (!c.total && c.unknown) return 'dle ceníku';
+  return kc(c.total) + (c.unknown ? ' + dle ceníku' : '');
+}
+function sizedItems(){ return chosen().filter(function(k){ return item(k).size; }); }
+function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
+function nameOk(v){ return v.trim().split(/\s+/).filter(Boolean).length >= 2 && v.trim().length >= 5; }
+
+function valid(step){
+  if (step === 0) return nameOk(S.name) && !!S.kat && emailOk(S.email);
+  if (step === 1) return !!S.base && chosen().length > 0;
+  if (step === 2) return sizedItems().every(function(k){ return !!S.sizes[k]; });
+  if (step === 3) return S.consent;
+  return true;
+}
+function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function(){ t.classList.remove('show'); }, 3200); }
+
+/* ================================ RENDER ================================= */
+function renderChrome(){
+  $('stepn').innerHTML = S.sent ? '' : 'Krok <b>' + (S.step + 1) + '</b> / ' + STEPS.length;
+  $('rail').innerHTML = STEPS.map(function(n, i){
+    var cls = S.sent || i < S.step ? 'done' : (i === S.step ? 'on' : '');
+    return '<button type="button" data-go="' + i + '" class="' + cls + '"' + (S.sent || i > S.step ? ' disabled' : '') + '><i></i><span>' + (i + 1) + '. ' + n + '</span></button>';
+  }).join('');
+  var bar = $('bar'); bar.style.display = S.sent ? 'none' : '';
+  $('back').style.visibility = S.step === 0 ? 'hidden' : 'visible';
+  $('barTot').textContent = totalText(); $('barTot').className = (!S.base || totalText() === 'dle ceníku') ? 'u' : '';
+  var last = S.step === STEPS.length - 1;
+  $('next').innerHTML = last ? (S.busy ? 'Odesílám…' : 'Odeslat') + ICON.send : 'Pokračovat' + ICON.next;
+  $('next').disabled = S.busy;
+  renderAside();
+}
+function renderAside(){
+  var ch = chosen(), c = calc();
+  $('aside').innerHTML = '<h3>Tvůj set</h3><p class="mini">' + (S.name ? esc(S.name) + (S.kat ? ' · ' + esc(S.kat) : '') : 'Skládáme objednávku…') + '</p>' +
+    (ch.length ? '<div class="stack">' + ch.map(function(k){ return '<div class="th"><img src="' + img(k) + '" alt=""></div>'; }).join('') + '</div>' +
+      ch.map(function(k){ var it = item(k); return '<div class="kv"><span>' + esc(k) + '</span><span>' + (S.sizes[k] ? esc(S.sizes[k]) : (it.size ? '<span style="color:var(--amber)">?</span>' : '–')) + '</span></div>'; }).join('')
+    : '<div class="empty">Zatím nic nevybráno</div>') +
+    '<div class="kv" style="border-top:1px solid var(--border);margin-top:8px;padding-top:12px"><span>Celkem</span><span style="font-size:18px;font-weight:700;color:var(--accent)">' + totalText() + '</span></div>';
+}
+
+function stepHero(){
+  return '<div class="hero"><div><p class="eyebrow">Sezóna 2026/27</p><h1>Sestav si svůj <em>klubový set</em></h1>' +
+    '<p class="lead">Čtyři rychlé kroky: údaje o hráči, výběr setu, velikosti a hotovo. Objednávku pak připravíme k vyzvednutí a pošleme e-mail.</p>' +
+    '<div class="stats"><span class="pill"><b>4</b> kroky</span><span class="pill"><b>~2</b> min</span><span class="pill">Givova</span></div></div>' +
+    '<div class="stage" id="stage">' + ['zimni','teplaky','sustak','triko','kratasy'].map(function(k){ return '<div class="p"><img src="img/' + k + '.webp" alt=""></div>'; }).join('') + '</div></div>';
+}
+function step0(){
+  var t = S.tried[0];
+  return stepHero() +
+    '<div class="fld' + (t && !nameOk(S.name) ? ' bad' : '') + '"><input id="f_name" autocomplete="name" placeholder=" " value="' + esc(S.name) + '"><label for="f_name">Jméno a příjmení hráče</label></div>' +
+    (t && !nameOk(S.name) ? '<div class="hint">Napiš jméno i příjmení.</div>' : '') +
+    '<span class="lbl' + (t && !S.kat ? ' bad' : '') + '">Kategorie</span><div class="chips">' + KATS.map(function(c){
+      return '<button type="button" class="chip' + (S.kat === c[0] ? ' on' : '') + '" data-kat="' + esc(c[0]) + '">' + esc(c[0]) + (c[1] ? '<small>' + esc(c[1]) + '</small>' : '') + '</button>'; }).join('') + '</div>' +
+    '<div class="fld' + (t && !emailOk(S.email) ? ' bad' : '') + '"><input id="f_email" type="email" inputmode="email" autocomplete="email" placeholder=" " value="' + esc(S.email) + '"><label for="f_email">E-mail pro potvrzení a vyzvednutí</label></div>' +
+    (t && !emailOk(S.email) ? '<div class="hint">Zadej platný e-mail.</div>' : '');
+}
+function step1(){
+  var t = S.tried[1], b = baseItems(), rest = ALL.filter(function(k){ return b.indexOf(k) === -1; });
+  var sets = SETS.map(function(s){
+    var on = S.base === s.k, p = s.single ? null : calc2(s);
+    return '<button type="button" class="set' + (on ? ' on' : '') + (s.tag ? ' tagged' : '') + '" data-set="' + esc(s.k) + '">' + (s.tag ? '<span class="badge">' + s.tag + '</span>' : '') +
+      '<div class="top"><div class="nm">' + esc(s.k) + '<small>' + esc(s.sub) + '</small></div>' +
+      (s.single ? '<span class="tick">' + ICON.check + '</span>' : '<span class="pr' + (p.u ? ' u' : '') + '">' + (p.u ? (p.t ? 'od ' + kc(p.t) : 'dle ceníku') : kc(p.t)) + '</span>') + '</div>' +
+      (s.single ? '' : '<div class="thumbs">' + ALL.map(function(k){ return '<div class="th' + (s.items.indexOf(k) === -1 ? ' off' : '') + '"><img src="' + img(k) + '" alt=""></div>'; }).join('') + '</div>') + '</button>';
+  }).join('');
+  var extras = '';
+  if (S.base) {
+    var single = setOf(S.base).single;
+    extras = '<span class="lbl' + (t && !chosen().length ? ' bad' : '') + '">' + (single ? 'Vyber kusy' : 'Chceš něco navíc?') + '</span>' +
+      (rest.length ? '<div class="xgrid">' + rest.map(function(k){ var it = item(k), on = S.extras.indexOf(k) !== -1;
+        return '<button type="button" class="xt' + (on ? ' on' : '') + '" data-ex="' + esc(k) + '"><div class="pic"><img src="img/' + it.img + '.webp" alt=""><span class="tick">' + ICON.check + '</span></div>' +
+          '<div class="nm">' + esc(k) + '</div><div class="pr">' + (it.price != null ? '+ ' + kc(it.price) : 'cena dle ceníku') + '</div></button>'; }).join('') + '</div>'
+        : '<div class="note">🎉 Kompletní set už obsahuje všechno.</div>');
+  }
+  return '<p class="eyebrow">Krok 2</p><h2>Vyber si set</h2><p class="lead">Set je výhodnější než kusy zvlášť. Cokoli můžeš ještě přidat navíc.</p><div class="sets">' + sets + '</div>' + extras;
+}
+function calc2(s){ // cena nabízeného setu
+  if (s.price != null) return { t:s.price, u:false };
+  var t = 0, u = false; s.items.forEach(function(k){ var p = item(k).price; if (p == null) u = true; else t += p; });
+  return { t:t, u:u };
+}
+function step2(){
+  var t = S.tried[2], list = sizedItems(), noSize = chosen().filter(function(k){ return !item(k).size; });
+  return '<p class="eyebrow">Krok 3</p><h2>Velikosti</h2><p class="lead">U sportovního oblečení raději vol o číslo větší, hráč do něj ještě doroste.</p>' +
+    (list.length > 1 ? '<div class="same"><span>Stejná velikost pro vše:</span><div class="sizes">' + SIZES.map(function(z){ return '<button type="button" data-all="' + z + '">' + z + '</button>'; }).join('') + '</div></div>' : '') +
+    '<div class="items">' + list.map(function(k){ var it = item(k), v = S.sizes[k];
+      return '<div class="sz' + (v ? ' ok' : (t ? ' bad' : '')) + '"><div class="pic"><img src="img/' + it.img + '.webp" alt=""></div><div><div class="nm"><span>' + esc(k) + '</span><span class="b">' + (v ? esc(v) : 'vyber') + '</span></div>' +
+        '<div class="sizes">' + SIZES.map(function(z){ return '<button type="button" class="' + (v === z ? 'on' : '') + '" data-sz="' + esc(k) + '|' + z + '">' + z + '</button>'; }).join('') + '</div></div></div>'; }).join('') + '</div>' +
+    (noSize.length ? '<div class="note">' + esc(noSize.join(', ')) + ' – velikost se nevybírá.</div>' : '') +
+    (!list.length ? '<div class="note">V objednávce není nic, co by mělo velikost. Pokračuj dál.</div>' : '');
+}
+function step3(){
+  var ch = chosen();
+  return '<p class="eyebrow">Krok 4</p><h2>Skoro hotovo</h2><p class="lead">Zkontroluj si objednávku. Po odeslání dostaneš potvrzení e-mailem.</p>' +
+    '<div class="ticket"><div class="part"><div class="kv"><span>Hráč</span><span>' + esc(S.name) + '</span></div><div class="kv"><span>Kategorie</span><span>' + esc(KAT_FULL[S.kat] || S.kat) + '</span></div><div class="kv"><span>E-mail</span><span>' + esc(S.email) + '</span></div></div>' +
+    '<div class="perf"></div><div class="part"><div class="kv" style="padding-top:0"><span>Typ</span><span>' + esc(S.base) + '</span></div>' +
+    ch.map(function(k){ var it = item(k), kind = lineKind(k);
+      return '<div class="line"><div class="th"><img src="' + img(k) + '" alt=""></div><div><div class="nm">' + esc(k) + '</div><div class="sub">' + (it.size ? 'Velikost ' + esc(S.sizes[k] || '?') : 'Univerzální') + (kind === 'extra' && !setOf(S.base).single ? ' · navíc' : '') + '</div></div>' +
+        '<div class="pr">' + (kind === 'extra' || setOf(S.base).single ? (it.price != null ? kc(it.price) : 'dle ceníku') : '') + '</div></div>'; }).join('') +
+    '</div><div class="perf"></div><div class="part"><div class="total"><span>Celkem</span><b>' + totalText() + '</b></div></div></div>' +
+    '<div class="fld"><textarea id="f_note" placeholder=" ">' + esc(S.note) + '</textarea><label for="f_note">Poznámka (nepovinné)</label></div>' +
+    '<input class="hp" id="f_hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+    '<label class="consent' + (S.tried[3] && !S.consent ? ' bad' : '') + '"><input type="checkbox" id="f_consent"' + (S.consent ? ' checked' : '') + '><span>Souhlasím se zpracováním uvedených údajů pro účely vyřízení objednávky klubového oblečení.</span></label>';
+}
+function stepDone(){
+  var o = S.sent;
+  return '<div class="done"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path d="M30 52l14 14 27-30"/></svg></div>' +
+    '<p class="eyebrow">' + (o.mail ? 'Ještě jeden klik' : 'Objednávka odeslána') + '</p><h1>' + (o.mail ? 'Dokonči <em>e-mailem</em>' : 'Díky, <em>' + esc(S.name.split(/\s+/)[0]) + '</em>!') + '</h1>' +
+    '<p class="lead" style="margin:10px auto 0">' + (o.mail ? 'Odesílací služba zatím není zapojená. Otevři předvyplněný e-mail a odešli ho klubu.' : 'Objednávku jsme přijali. Až bude oblečení nachystané, pošleme ti e-mail s místem a časem vyzvednutí.') + '</p>' +
+    '<div class="code">' + esc(o.code) + '</div><div class="kv" style="justify-content:center;gap:8px"><span>Celkem</span><span style="color:var(--accent);font-weight:700">' + totalText() + '</span></div>' +
+    '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">' +
+    (o.mail ? '<a class="btn pri" href="' + esc(o.mail) + '">Otevřít e-mail' + ICON.send + '</a><button class="btn" type="button" id="copyBtn">Zkopírovat text</button>' : '') +
+    '<button class="btn' + (o.mail ? ' ghost' : ' pri') + '" type="button" id="again">Nová objednávka</button></div></div>';
+}
+
+function render(keepScroll){
+  var m = $('main');
+  m.innerHTML = '<div class="step' + (keepScroll ? ' still' : '') + '">' + (S.sent ? stepDone() : [step0, step1, step2, step3][S.step]()) + '</div>';
+  renderChrome();
+  if (!keepScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (S.sent && !S.sent.mail) confetti();
+}
+
+/* ================================ AKCE =================================== */
+function go(n){ S.step = n; render(); }
+function next(){
+  if (S.sent || S.busy) return;
+  if (!valid(S.step)) {
+    S.tried[S.step] = true; render(true);
+    var msg = ['Doplň jméno, kategorii a e-mail.', 'Vyber set nebo aspoň jeden kus.', 'Vyber všechny velikosti.', 'Potvrď souhlas se zpracováním údajů.'][S.step];
+    toast(msg); var bad = document.querySelector('.bad'); if (bad) bad.scrollIntoView({ block:'center', behavior:'smooth' });
+    return;
+  }
+  if (S.step === STEPS.length - 1) return submit();
+  go(S.step + 1);
+}
+
+function payload(){
+  var ch = chosen(), s = setOf(S.base), typ, extra;
+  function lab(k){ var p = item(k).price; return p != null ? k + ' – ' + p + ' Kč' : k; }
+  if (s.single) { typ = lab(ch[0]); extra = ch.slice(1).map(lab).join(', '); }
+  else { typ = s.price != null ? s.k + ' – ' + s.price + ' Kč' : s.k; extra = S.extras.map(lab).join(', '); }
+  var c = calc(), o = {
+    'Jméno a příjmení': S.name.trim(), 'Kategorie': KAT_FULL[S.kat] || S.kat, 'E-mail': S.email.trim(),
+    'Typ setu': typ, 'Volitelné položky': extra, 'Poznámka': S.note.trim(),
+    'Celková cena': c.unknown ? (c.total ? c.total + ' Kč + položky dle ceníku' : 'dle ceníku') : c.total + ' Kč'
+  };
+  Object.keys(SIZECOL).forEach(function(k){ o[SIZECOL[k]] = ch.indexOf(k) !== -1 ? (S.sizes[k] || '') : ''; });
+  return o;
+}
+function mailBody(p){ return Object.keys(p).filter(function(k){ return p[k]; }).map(function(k){ return k + ': ' + p[k]; }).join('\n'); }
+function code(){ return 'FKS-' + Date.now().toString(36).toUpperCase().slice(-5) + Math.floor(Math.random() * 36).toString(36).toUpperCase(); }
+
+function submit(){
+  if (S.hp) return; // spam
+  var p = payload(), c = code(); p['Kód'] = c;
+  S.busy = true; renderChrome();
+  var done = function(extra){ S.busy = false; S.sent = Object.assign({ code:c }, extra || {}); try { localStorage.removeItem(DKEY); } catch(e){} render(); };
+  if (DEMO) return setTimeout(done, 900);
+  if (!CONFIG.ENDPOINT) {
+    var body = 'Objednávka klubového oblečení (' + c + ')\n\n' + mailBody(p);
+    S.sent = null; S.busy = false; S._body = body;
+    return done({ mail: 'mailto:' + CONFIG.MAIL_TO + '?subject=' + encodeURIComponent('Objednávka oblečení – ' + S.name.trim()) + '&body=' + encodeURIComponent(body) });
+  }
+  fetch(CONFIG.ENDPOINT, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ token: CONFIG.TOKEN, order: p }) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){ if (!j || !j.ok) throw new Error((j && j.error) || 'chyba'); done(); })
+    .catch(function(){ S.busy = false; renderChrome(); toast('Odeslání se nepovedlo. Zkus to prosím znovu.'); });
+}
+
+function confetti(){
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var h = document.createElement('div'), cols = ['#00ffff','#38bdf8','#818cf8','#34d399','#fff']; h.className = 'conf';
+  for (var i = 0; i < 70; i++) { var e = document.createElement('i'); e.style.left = Math.random() * 100 + '%'; e.style.background = cols[i % cols.length];
+    e.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px'); e.style.animationDuration = (2.2 + Math.random() * 2) + 's'; e.style.animationDelay = (Math.random() * .6) + 's'; h.appendChild(e); }
+  document.body.appendChild(h); setTimeout(function(){ h.remove(); }, 5200);
+}
+
+/* ============================== UDÁLOSTI ================================= */
+document.addEventListener('click', function(e){
+  var t = e.target.closest('[data-go],[data-kat],[data-set],[data-ex],[data-sz],[data-all],#next,#back,#again,#copyBtn'); if (!t) return;
+  if (t.id === 'next') return next();
+  if (t.id === 'back') return S.step > 0 && go(S.step - 1);
+  if (t.id === 'again') { S = { step:0, name:'', kat:'', email:'', base:'', extras:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false }; return render(); }
+  if (t.id === 'copyBtn') { var txt = S._body || ''; if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ t.textContent = 'Zkopírováno ✓'; }); return; }
+  if (t.dataset.go != null) return go(+t.dataset.go);
+  if (t.dataset.kat) { S.kat = t.dataset.kat; save(); Array.prototype.forEach.call(document.querySelectorAll('[data-kat]'), function(c){ c.classList.toggle('on', c === t); }); var lb = document.querySelector('.lbl.bad'); if (lb) lb.classList.remove('bad'); return renderChrome(); }
+  if (t.dataset.set) {
+    S.base = t.dataset.set; var inb = baseItems(); S.extras = S.extras.filter(function(k){ return inb.indexOf(k) === -1; }); save(); return render(true);
+  }
+  if (t.dataset.ex) { var k = t.dataset.ex, i = S.extras.indexOf(k); if (i === -1) S.extras.push(k); else S.extras.splice(i, 1); save(); return render(true); }
+  if (t.dataset.sz) { var a = t.dataset.sz.split('|'); S.sizes[a[0]] = a[1]; save(); return render(true); }
+  if (t.dataset.all) { sizedItems().forEach(function(k){ S.sizes[k] = t.dataset.all; }); save(); return render(true); }
+});
+document.addEventListener('input', function(e){
+  var id = e.target.id;
+  if (id === 'f_name') S.name = e.target.value; else if (id === 'f_email') S.email = e.target.value;
+  else if (id === 'f_note') S.note = e.target.value; else if (id === 'f_consent') S.consent = e.target.checked; else if (id === 'f_hp') S.hp = e.target.value; else return;
+  save(); renderAside(); if (id === 'f_consent') e.target.closest('.consent').classList.remove('bad');
+  var f = e.target.closest('.fld'); if (f) f.classList.remove('bad');
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); next(); } });
+// jemný 3D náklon hlavního vizuálu
+document.addEventListener('pointermove', function(e){
+  var st = $('stage'); if (!st || e.pointerType === 'touch') return;
+  var r = st.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+  Array.prototype.forEach.call(st.children, function(c, i){ var d = (i % 3 + 1) * 5; c.style.translate = (x * d) + 'px ' + (y * d) + 'px'; });
+});
+render(true);
+</script>
+</body>
+</html>

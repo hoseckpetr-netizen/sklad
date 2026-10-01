@@ -21,6 +21,7 @@ header.top img{width:26px;height:26px;object-fit:contain}
 header.top .t{font-weight:600;font-size:13.5px;line-height:1.15}
 header.top .t small{display:block;font-weight:400;color:var(--muted);font-size:11px}
 header.top .sp{flex:1}
+header.top a.ibtn{text-decoration:none}
 .ibtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .ibtn:active{transform:scale(.95)}
 .ibtn.spin svg{animation:sp 1s linear infinite}
@@ -741,6 +742,7 @@ function renderTop(){
 }
 function shell(){
   return '<div id="app"><header class="top" id="top"><img src="logo.png" alt=""><div class="t">Sklad oblečení<small>' + esc(DEMO ? 'DEMO režim' : 'FK Slovany Pardubice') + '</small></div><div class="sp"></div>' +
+    '<a class="ibtn" href="objednavka.html" target="_blank" rel="noopener" title="Objednávkový formulář" aria-label="Objednávkový formulář"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg></a>' +
     '<button class="ibtn" data-act="refresh" title="Obnovit">' + ICON.refresh + '</button><button class="ibtn" data-act="signout" title="Odhlásit">' + ICON.out2 + '</button></header>' +
     '<main id="main"></main></div><nav class="bottom"><div class="navin" id="nav"></div></nav>';
 }
