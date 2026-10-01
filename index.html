@@ -15,7 +15,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',system-ui,sans-serif;font-size:15px}
 button,input,select,textarea{font:inherit;color:inherit}
-#app{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:calc(var(--nav) + 24px + env(safe-area-inset-bottom))}
+#app{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:calc(var(--nav) + 48px + max(env(safe-area-inset-bottom),14px))}
 header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:rgba(11,13,16,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
 header.top img{width:32px;height:32px;object-fit:contain}
 header.top .t{font-weight:600;font-size:15px;line-height:1.15}
@@ -26,9 +26,9 @@ header.top .sp{flex:1}
 .ibtn.spin svg{animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 main{padding:14px 16px}
-nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:rgba(14,17,20,.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:rgba(14,17,20,.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding-bottom:max(env(safe-area-inset-bottom),14px)}
 nav.bottom .in{display:flex;width:100%;max-width:760px}
-nav.bottom button{flex:1;height:var(--nav);background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;cursor:pointer;position:relative}
+nav.bottom button{flex:1;height:var(--nav);background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;line-height:1.2;cursor:pointer;position:relative;overflow:visible}
 nav.bottom button.on{color:var(--accent)}
 nav.bottom button svg{width:22px;height:22px}
 nav.bottom .dot{position:absolute;top:9px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:8px;background:var(--red);color:#fff;font-size:10px;line-height:16px;text-align:center;padding:0 4px;font-weight:600}
@@ -94,7 +94,7 @@ table.t td.v{font-weight:600}
 .sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.15s}
 .sw.on{background:var(--accent)}.sw.on::after{left:25px;background:#04201f}
 .empty{text-align:center;color:var(--muted);padding:40px 10px}
-#toastHost{position:fixed;left:0;right:0;bottom:calc(var(--nav) + 14px + env(safe-area-inset-bottom));z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+#toastHost{position:fixed;left:0;right:0;bottom:calc(var(--nav) + 28px + max(env(safe-area-inset-bottom),14px));z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
 .toast{background:#222831;border:1px solid var(--border);border-radius:12px;padding:10px 16px;font-size:13.5px;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:up .2s;max-width:520px}
 .toast.err{border-color:var(--red);color:#fecaca}.toast.ok{border-color:rgba(52,211,153,.5)}
 .login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center}
@@ -123,7 +123,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '1. 10. 2026 – KIS: zadáno + zaplaceno s časem';
+var APP_VERSION = '1. 10. 2026 – tlačítko Zpět + spodní lišta';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -551,7 +551,19 @@ function confirmBox(title, text, okLabel){
 function openSheet(html){ var h = document.getElementById('ovHost'); var ex = h.querySelector('.ov.main'); if (ex) { ex.querySelector('.sheet').innerHTML = '<div class="grab"></div>' + html; return; }
   var d = document.createElement('div'); d.className = 'ov main'; d.innerHTML = '<div class="sheet"><div class="grab"></div>' + html + '</div>';
   d.onclick = function(e){ if (e.target === d) closeSheet(); }; h.appendChild(d); }
-function closeSheet(){ var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; }
+function closeSheet(fromPop){
+  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null;
+  if (UI.sheetPushed) { UI.sheetPushed = false; if (fromPop !== true) { UI.ignorePop = true; try { history.back(); } catch (e) { UI.ignorePop = false; } } }
+}
+function pushNav(state){ try { history.pushState(state, ''); } catch (e) {} }
+// Tlačítko Zpět: nejdřív zavře otevřený detail, potom vrací mezi záložkami (místo opuštění aplikace)
+window.addEventListener('popstate', function(e){
+  if (UI.ignorePop) { UI.ignorePop = false; return; }
+  if (document.querySelector('#ovHost .ov:not(.main)')) { pushNav({ tab: UI.tab }); return; }   // otevřený potvrzovací dialog – zůstat
+  if (document.querySelector('#ovHost .ov.main')) { closeSheet(true); return; }
+  var st = e.state;
+  if (st && st.tab && st.tab !== UI.tab) { UI.tab = st.tab; UI.q = ''; renderAll(); window.scrollTo(0, 0); }
+});
 
 function isAdmin(){ return role === 'admin'; }
 function countOpenProblems(){ return M.orders ? M.orders.filter(function(o){ return o.problem; }).length : 0; }
@@ -754,13 +766,13 @@ document.addEventListener('click', function(e){
   var t = e.target.closest('[data-act]'); if (!t) return;
   var a = t.getAttribute('data-act'), o = UI.openOrder ? M.orders.filter(function(x){ return x.id === UI.openOrder; })[0] : null;
   switch (a) {
-    case 'tab': UI.tab = t.getAttribute('data-tab'); UI.q = ''; closeSheet(); window.scrollTo(0, 0); renderAll(); break;
+    case 'tab': var nt = t.getAttribute('data-tab'); if (nt !== UI.tab) { UI.tab = nt; pushNav({ tab: nt }); } UI.q = ''; closeSheet(true); window.scrollTo(0, 0); renderAll(); break;
     case 'filter': UI.filter = t.getAttribute('data-f'); renderAll(); break;
     case 'vmode': UI.vydejMode = t.getAttribute('data-m'); renderAll(); break;
     case 'sitem': UI.skladItem = t.getAttribute('data-i'); renderAll(); break;
     case 'refresh': refresh(); break;
     case 'signout': signOut(); break;
-    case 'open': UI.openOrder = t.getAttribute('data-id'); renderOrderSheet(); break;
+    case 'open': UI.openOrder = t.getAttribute('data-id'); renderOrderSheet(); if (!UI.sheetPushed) { UI.sheetPushed = true; pushNav({ tab: UI.tab, sheet: 1 }); } break;
     case 'closeSheet': closeSheet(); break;
     case 'kiszad': if (o) actKisZadano(o); break;
     case 'kis': if (o) actKis(o); break;
@@ -882,6 +894,7 @@ function afterSignIn(){
   }).catch(function(e){ showLogin('Nepodařilo se ověřit účet: ' + e.message); });
 }
 function start(){
+  try { history.replaceState({ tab: UI.tab }, ''); } catch (e) {}
   document.getElementById('root').innerHTML = shell(); renderAll(); refresh();
   document.addEventListener('visibilitychange', function(){ if (!document.hidden && M.loaded && !UI.busy && Date.now() - (UI.last || 0) > 60000) { UI.last = Date.now(); refresh(); } });
   UI.last = Date.now();
