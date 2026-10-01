@@ -36,7 +36,7 @@ nav.bottom .dot{position:absolute;top:4px;left:calc(50% + 8px);min-width:16px;he
 h2{font-size:16px;margin:2px 0 8px}
 .muted{color:var(--muted)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;margin-bottom:8px}
-.search{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:0 10px;height:38px;margin-bottom:8px}
+.search{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:0 10px;height:34px;margin-bottom:8px}
 .search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,255,.12)}
 .search input{flex:1;background:none;border:0;outline:0;height:100%;min-width:0}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:0 -12px 4px;padding-left:12px;padding-right:12px;scrollbar-width:none}
@@ -116,15 +116,19 @@ table.t td.v{font-weight:600}
 .acc .accb label.f{margin:8px 0 3px;font-size:11px}
 .cnt{background:var(--amber);color:#1a1200;border-radius:8px;padding:0 6px;font-size:10.5px;font-weight:600}
 .mx{width:100%;border-collapse:collapse;table-layout:fixed}
-.mx th{font-size:10px;font-weight:500;color:var(--muted);padding:3px 0;text-align:center}
+.mx th{font-size:9.5px;font-weight:500;color:var(--muted);padding:2px 0;text-align:center}
 .mx th:first-child{width:50px}
-.mx td{padding:5px 0;text-align:center;border-top:1px solid var(--border);font-size:13px;line-height:1.1;cursor:pointer}
-.mx td.n{text-align:left;font-size:10.5px;color:var(--muted);padding-left:2px;overflow:visible;white-space:nowrap}
+.mx td{padding:4px 0;text-align:center;border-top:1px solid var(--border);font-size:12px;line-height:1.1}
+.mx td.n{text-align:left;font-size:10.5px;color:var(--muted);padding-left:2px;overflow:visible;white-space:nowrap;font-weight:400}
 .mx td small{display:block;font-size:9px;color:var(--amber);font-weight:400}
-.mx td.low{background:rgba(251,191,36,.07)} .mx td.neg{background:rgba(248,113,113,.2)} .mx td.sel{outline:1px solid var(--accent);outline-offset:-1px}
+.mx td.low{color:var(--amber);font-weight:600}
 .mx td .z{color:#3a424b}
 .mi{width:100%;height:26px;background:var(--card2);border:1px solid var(--border);border-radius:6px;text-align:center;font-size:11.5px;padding:0;color:var(--text);min-width:0}
 .scrollx{overflow-x:auto;margin:0 -2px}
+.cmp .in{height:31px;font-size:12px;padding:0 8px}
+.cmp select.in{padding-right:22px;background-position:right 8px center}
+.cmp .btn{height:33px;font-size:12.5px}
+.seg button{font-size:12px}
 @media(min-width:760px){main{padding:18px 0}header.top{padding-left:max(16px,calc(50vw - 380px))}}
 </style>
 </head>
@@ -143,7 +147,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '2. 10. 2026 – kompaktní sklad, nastavení, příjem a výdej';
+var APP_VERSION = '2. 10. 2026 – přehledný sklad, menší písmo';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -846,9 +850,9 @@ function vydejView(){
   var seg = '<div class="seg"><button data-act="vmode" data-m="orders" class="' + (UI.vydejMode === 'orders' ? 'on' : '') + '">Objednávky</button><button data-act="vmode" data-m="free" class="' + (UI.vydejMode === 'free' ? 'on' : '') + '">Mimo objednávku</button></div>';
   if (UI.vydejMode === 'free') {
     var its = ITEMS.map(function(i){ return '<option>' + i + '</option>'; }).join('');
-    return seg + '<div class="card" style="padding:9px 10px"><div class="row"><select class="in" id="fi" data-change="fi">' + its + '</select><select class="in" id="fs" style="max-width:84px">' + sizeOptions('Triko') + '</select><input class="in" id="fk" type="number" min="1" value="1" inputmode="numeric" style="max-width:56px;text-align:center"></div>' +
+    return seg + '<div class="card cmp" style="padding:8px 9px"><div class="row"><select class="in" id="fi" data-change="fi">' + its + '</select><select class="in" id="fs" style="max-width:84px">' + sizeOptions('Triko') + '</select><input class="in" id="fk" type="number" min="1" value="1" inputmode="numeric" style="max-width:56px;text-align:center"></div>' +
       '<div class="row" style="margin-top:6px"><input class="in" id="fn" placeholder="Komu (jméno)"><input class="in" id="fp" placeholder="Poznámka"></div>' +
-      '<button class="btn pri blk" style="margin-top:8px;height:38px" data-act="freeOut">Vydat</button></div>' + recentMoves('VYDEJ', 8, true);
+      '<button class="btn pri blk" style="margin-top:7px" data-act="freeOut">Vydat</button></div>' + recentMoves('VYDEJ', 8, true);
   }
   var q = norm(UI.q), ready = M.orders.filter(function(o){ return isOpen(o) && o.prB; }),
     list = ready.filter(function(o){ return !q || norm(o.hrac).indexOf(q) !== -1; }).sort(function(a,b){ return String(a.cas) < String(b.cas) ? -1 : 1; }),
@@ -877,53 +881,51 @@ function recentMoves(typ, n, free){
 }
 function moveLine(m){
   var k = num(m.ks), names = { POC:'Počáteční stav', PRIJEM:'Příjem', VYDEJ:'Výdej', KOREKCE:'Korekce', VRACENI:'Vrácení' };
-  return '<div class="kv" style="font-size:11.5px;padding:4px 0;align-items:flex-start"><span><b>' + esc(m.item) + (m.velikost && m.velikost !== '-' ? ' ' + esc(m.velikost) : '') + '</b> <span class="muted">· ' + (names[m.typ] || m.typ) + ' · ' + fmtDT(m.cas) + (m.poznamka ? ' · ' + esc(m.poznamka) : '') + '</span></span><b class="' + (k < 0 ? 'neg' : 'pos') + '" style="white-space:nowrap">' + (k > 0 ? '+' : '') + k + '</b></div>';
+  return '<div class="kv" style="font-size:11px;padding:3px 0;align-items:flex-start"><span><b>' + esc(m.item) + (m.velikost && m.velikost !== '-' ? ' ' + esc(m.velikost) : '') + '</b> <span class="muted">· ' + (names[m.typ] || m.typ) + ' · ' + fmtDT(m.cas) + (m.poznamka ? ' · ' + esc(m.poznamka) : '') + '</span></span><b class="' + (k < 0 ? 'neg' : 'pos') + '" style="white-space:nowrap">' + (k > 0 ? '+' : '') + k + '</b></div>';
 }
 
 /* ---------- Sklad ---------- */
-var SHORTNAME = { 'Tepláková souprava': 'Tepláky', 'Šusťáková bunda': 'Šusťák', 'Zimní bunda': 'Zimní' };
+var SHORTNAME = { 'Tepláková souprava': 'Souprava', 'Šusťáková bunda': 'Šusťák', 'Zimní bunda': 'Zimní' };
 function secOpen(id, def){ return (UI.sec && id in UI.sec ? UI.sec[id] : def) ? ' open' : ''; }
+function skladChips(){ return '<div class="chips" style="margin:6px -12px 4px">' + ITEMS.map(function(i){ return '<button class="chip ' + (UI.skladItem === i ? 'on' : '') + '" data-act="sitem" data-i="' + esc(i) + '">' + esc(SHORTNAME[i] || i) + '</button>'; }).join('') + '</div>'; }
 function skladView(){
   var low = lowList(), it = UI.skladItem, sized = ITEMS.filter(function(i){ return !NOSIZE[i]; });
   var head = '<tr><th></th>' + SIZES.map(function(x){ return '<th>' + x + '</th>'; }).join('') + '</tr>';
   var rows = sized.map(function(item){
-    return '<tr><td class="n" data-act="sitem" data-i="' + esc(item) + '">' + esc(SHORTNAME[item] || item) + '</td>' + SIZES.map(function(x){
-      var k = item + '|' + x, fy = M.stock[k] || 0, rz = M.reserved[k] || 0, fr = fy - rz, mn = M.min[k] || 0;
-      var cls = fr < 0 ? 'neg' : (mn && fr < mn ? 'low' : '');
-      return '<td class="' + cls + (item === it ? ' sel' : '') + '" data-act="sitem" data-i="' + esc(item) + '">' + (fy || rz ? '<b>' + fy + '</b>' : '<span class="z">·</span>') + (rz ? '<small>−' + rz + '</small>' : '') + '</td>';
+    return '<tr><td class="n">' + esc(SHORTNAME[item] || item) + '</td>' + SIZES.map(function(x){
+      var k = item + '|' + x, fy = M.stock[k] || 0, mn = M.min[k] || 0;
+      return '<td class="' + (mn && fy < mn ? 'low' : '') + '">' + (fy || mn ? fy : '<span class="z">·</span>') + '</td>';
     }).join('') + '</tr>';
   }).join('');
-  var bk = 'Batoh|-', bfy = M.stock[bk] || 0, brz = M.reserved[bk] || 0, bmn = M.min[bk] || 0, bcls = bfy - brz < 0 ? 'neg' : (bmn && bfy - brz < bmn ? 'wr' : '');
-  var batoh = '<div class="kv" style="font-size:12.5px"><span>Batoh</span><span class="' + bcls + '"><b>' + bfy + ' ks</b>' + (brz ? ' <span class="wr">(−' + brz + ' rezerv.)</span>' : '') + (bmn ? ' <span class="muted">· min ' + bmn + '</span>' : '') + '</span></div>';
-  var matrix = '<div class="card" style="padding:8px 8px 6px"><div class="scrollx"><table class="mx">' + head + rows + '</table></div>' + batoh +
-    '<div class="mini" style="margin-top:5px;font-size:10.5px">Číslo = fyzicky skladem · <span class="wr">−N</span> rezervováno · žlutě pod minimem, červeně chybí</div></div>';
+  var batoh = '<tr><td class="n">Batoh</td><td colspan="9" style="text-align:left;padding-left:6px' + ((M.min['Batoh|-'] || 0) && (M.stock['Batoh|-'] || 0) < (M.min['Batoh|-'] || 0) ? ';color:var(--amber);font-weight:600' : '') + '">' + (M.stock['Batoh|-'] || 0) + ' ks</td></tr>';
+  var matrix = '<div class="card" style="padding:7px 8px 5px"><div class="mini" style="font-size:10.5px;margin:0 0 3px 2px">Aktuální stav skladu (ks) · <span class="wr">žlutě</span> = pod minimem</div><div class="scrollx"><table class="mx">' + head + rows + batoh + '</table></div></div>';
   var lowHtml = low.length ? ITEMS.map(function(item){
     var l = low.filter(function(x){ return x.item === item; }); if (!l.length) return '';
     var tot = l.reduce(function(a, x){ return a + x.need; }, 0);
-    return '<div class="kv" style="align-items:flex-start"><span><b>' + esc(item) + '</b><div class="mini" style="margin-top:2px">' + l.map(function(x){ return (x.size === '-' ? 'ks' : x.size) + ' <b class="wr">+' + x.need + '</b>'; }).join(' · ') + '</div></span><b class="wr">+' + tot + '</b></div>';
+    return '<div class="kv" style="align-items:flex-start;font-size:12px"><span><b>' + esc(item) + '</b><div class="mini" style="margin-top:2px;font-size:10.5px">' + l.map(function(x){ return (x.size === '-' ? 'ks' : x.size) + ' <b class="wr">+' + x.need + '</b>'; }).join(' · ') + '</div></span><b class="wr">+' + tot + '</b></div>';
   }).join('') : '<div class="muted" style="padding:6px 0">Všechny položky jsou nad minimem.</div>';
-  var chips = ITEMS.map(function(i){ return '<button class="chip ' + (it === i ? 'on' : '') + '" data-act="sitem" data-i="' + esc(i) + '">' + esc(SHORTNAME[i] || i) + '</button>'; }).join('');
   var sizes = NOSIZE[it] ? ['-'] : SIZES;
   var drows = sizes.map(function(x){
     var k = it + '|' + x, fy = M.stock[k] || 0, rz = M.reserved[k] || 0, fr = fy - rz, mn = M.min[k] || 0;
     if (!fy && !rz && !mn) return '';
     return '<tr class="' + (fr < 0 ? 'neg' : (mn && fr < mn ? 'low' : '')) + '"><td>' + (x === '-' ? 'ks' : x) + '</td><td>' + fy + '</td><td class="wr">' + (rz || '') + '</td><td class="v ' + (fr < 0 ? 'neg' : '') + '">' + fr + '</td><td class="muted">' + (mn || '') + '</td></tr>';
   }).join('');
-  var hist = M.moves.filter(function(m){ return m.item === it; }).sort(function(a, b){ return String(a.cas) < String(b.cas) ? 1 : -1; }).slice(0, 15).map(moveLine).join('') || '<div class="muted">Bez pohybů.</div>';
+  var hist = M.moves.filter(function(m){ return m.item === it; }).sort(function(a, b){ return String(a.cas) < String(b.cas) ? 1 : -1; }).slice(0, 20).map(moveLine).join('') || '<div class="muted" style="padding:6px 0">Bez pohybů.</div>';
   return matrix +
-    '<details class="acc" data-sec="low"' + secOpen('low', false) + '><summary>Pod minimem – doobjednat' + (low.length ? ' <span class="cnt">' + low.length + '</span>' : '') + '</summary><div class="accb">' + lowHtml + '</div></details>' +
-    '<details class="acc" data-sec="sdet"' + secOpen('sdet', false) + '><summary>Detail a pohyby – ' + esc(it) + '</summary><div class="accb"><div class="chips" style="margin-top:6px">' + chips + '</div>' +
-    '<table class="t"><tr><th>Velikost</th><th>Fyzicky</th><th>Rezerv.</th><th>Volné</th><th>Min.</th></tr>' + (drows || '<tr><td colspan="5" class="muted">Nic skladem.</td></tr>') + '</table>' +
-    '<div class="sect">Poslední pohyby</div>' + hist + '</div></details>';
+    '<details class="acc" data-sec="low"' + secOpen('low', false) + '><summary>K doobjednání (pod minimem)' + (low.length ? ' <span class="cnt">' + low.length + '</span>' : '') + '</summary><div class="accb">' + lowHtml + '</div></details>' +
+    '<details class="acc" data-sec="sdet"' + secOpen('sdet', false) + '><summary>Rezervace a volné kusy</summary><div class="accb">' + skladChips() +
+    '<table class="t" style="font-size:12px"><tr><th>Velikost</th><th>Fyzicky</th><th>Rezerv.</th><th>Volné</th><th>Min.</th></tr>' + (drows || '<tr><td colspan="5" class="muted">Nic skladem.</td></tr>') + '</table></div></details>' +
+    '<details class="acc" data-sec="shist"' + secOpen('shist', false) + '><summary>Historie pohybů</summary><div class="accb">' + skladChips() + hist + '</div></details>';
 }
+
 /* ---------- Příjem ---------- */
 function prijemView(){
   var its = ITEMS.map(function(i){ return '<option>' + i + '</option>'; }).join('');
   var adm = isAdmin() ? '<details class="acc" data-sec="korekce"' + secOpen('korekce', false) + '><summary>Korekce stavu (inventura)</summary><div class="accb"><div class="row" style="margin-top:6px"><select class="in" id="ci" data-change="ci">' + its + '</select><select class="in" id="cs" style="max-width:84px">' + sizeOptions('Triko') + '</select><input class="in" id="cn" type="number" min="0" inputmode="numeric" placeholder="skutečně ks" style="max-width:100px"></div>' +
     '<button class="btn blk" style="margin-top:8px;height:36px" data-act="korekce">Nastavit stav</button></div></details>' : '';
   var rec = M.moves.filter(function(m){ return m.typ === 'PRIJEM' || m.typ === 'KOREKCE'; }).sort(function(a,b){ return String(a.cas) < String(b.cas) ? 1 : -1; }).slice(0, 10);
-  return '<div class="card" style="padding:9px 10px"><div style="font-weight:600;font-size:13px;margin-bottom:6px">Příjem zboží</div><div class="row"><select class="in" id="ri" data-change="ri">' + its + '</select><select class="in" id="rs" style="max-width:84px">' + sizeOptions('Triko') + '</select><input class="in" id="rk" type="number" min="1" value="1" inputmode="numeric" style="max-width:56px;text-align:center"></div>' +
-    '<input class="in" id="rp" placeholder="Poznámka (např. dodací list)" style="margin-top:6px"><button class="btn pri blk" style="margin-top:8px;height:38px" data-act="receive">Přijmout na sklad</button></div>' + adm +
+  return '<div class="card cmp" style="padding:8px 9px"><div style="font-weight:600;font-size:12.5px;margin-bottom:5px">Příjem zboží</div><div class="row"><select class="in" id="ri" data-change="ri">' + its + '</select><select class="in" id="rs" style="max-width:84px">' + sizeOptions('Triko') + '</select><input class="in" id="rk" type="number" min="1" value="1" inputmode="numeric" style="max-width:56px;text-align:center"></div>' +
+    '<input class="in" id="rp" placeholder="Poznámka (např. dodací list)" style="margin-top:6px"><button class="btn pri blk" style="margin-top:7px" data-act="receive">Přijmout na sklad</button></div>' + adm +
     (rec.length ? '<div class="sect">Poslední příjmy a korekce</div><div class="card" style="padding:2px 10px">' + rec.map(moveLine).join('') + '</div>' : '');
 }
 
