@@ -67,8 +67,10 @@ function doPost(e) {
       try { mail.push('rodič: ' + sendMail(o['E-mail'], 'Objednávka klubového oblečení k nám dorazila!', confirmText(o), NOTIFY)); } catch (mailErr) { console.error('E-mail rodiči selhal: ' + mailErr); mail.push('rodič: CHYBA ' + mailErr); }
     }
     if (NOTIFY) {
-      try { mail.push('klub: ' + sendMail(NOTIFY, 'Nová objednávka oblečení – ' + o['Jméno a příjmení'],
-        Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ': ' + o[k]; }).join('\n'), o['E-mail'])); } catch (mailErr2) { console.error('Upozornění klubu selhalo: ' + mailErr2); mail.push('klub: CHYBA ' + mailErr2); }
+      // interní upozornění jde vždy z hlavní adresy účtu (ne přes alias přes Seznam SMTP, který při špatném nastavení zprávu vrátí)
+      try { MailApp.sendEmail(NOTIFY, 'Nová objednávka oblečení – ' + o['Jméno a příjmení'],
+        Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ': ' + o[k]; }).join('\n'), { name: 'Objednávky – web', replyTo: o['E-mail'] });
+        mail.push('klub: odesláno z hlavní adresy účtu'); } catch (mailErr2) { console.error('Upozornění klubu selhalo: ' + mailErr2); mail.push('klub: CHYBA ' + mailErr2); }
     }
     console.log('Objednávka zapsána. ' + mail.join(' | '));
     return out({ ok: true });
