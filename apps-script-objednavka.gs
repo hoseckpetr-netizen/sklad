@@ -61,11 +61,16 @@ function doPost(e) {
     sh.appendRow(row);
     lock.releaseLock();
 
+    // objednávka je už zapsaná; selhání e-mailu ji nesmí shodit, jen se zaloguje (Provádění v editoru skriptu)
+    var mail = [];
     if (CONFIRM_PARENT && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(o['E-mail'])) {
-      try { sendMail(o['E-mail'], 'Objednávka klubového oblečení k nám dorazila!', confirmText(o), NOTIFY); } catch (mailErr) {}
+      try { mail.push('rodič: ' + sendMail(o['E-mail'], 'Objednávka klubového oblečení k nám dorazila!', confirmText(o), NOTIFY)); } catch (mailErr) { console.error('E-mail rodiči selhal: ' + mailErr); mail.push('rodič: CHYBA ' + mailErr); }
     }
-    if (NOTIFY) sendMail(NOTIFY, 'Nová objednávka oblečení – ' + o['Jméno a příjmení'],
-      Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ': ' + o[k]; }).join('\n'), o['E-mail']);
+    if (NOTIFY) {
+      try { mail.push('klub: ' + sendMail(NOTIFY, 'Nová objednávka oblečení – ' + o['Jméno a příjmení'],
+        Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ': ' + o[k]; }).join('\n'), o['E-mail'])); } catch (mailErr2) { console.error('Upozornění klubu selhalo: ' + mailErr2); mail.push('klub: CHYBA ' + mailErr2); }
+    }
+    console.log('Objednávka zapsána. ' + mail.join(' | '));
     return out({ ok: true });
   } catch (err) {
     return out({ ok: false, error: String(err) });
@@ -73,14 +78,26 @@ function doPost(e) {
 }
 /** Odešle e-mail z aliasu SEND_FROM (přes Gmail); když alias nebo oprávnění chybí, odešle z hlavní adresy účtu. */
 function sendMail(to, subject, body, replyTo) {
-  try {
-    var opt = { name: SENDER_NAME };
-    if (replyTo) opt.replyTo = replyTo;
-    if (GmailApp.getAliases().indexOf(SEND_FROM) !== -1) opt.from = SEND_FROM;
-    GmailApp.sendEmail(to, subject, body, opt);
-  } catch (err) {
-    MailApp.sendEmail(to, subject, body, replyTo ? { name: SENDER_NAME, replyTo: replyTo } : { name: SENDER_NAME });
+  if (SEND_FROM) {                       // SEND_FROM = '' vypne alias a odesílá se z hlavní adresy účtu
+    try {
+      var opt = { name: SENDER_NAME };
+      if (replyTo) opt.replyTo = replyTo;
+      var aliases = GmailApp.getAliases();
+      if (aliases.indexOf(SEND_FROM) === -1) throw new Error('alias ' + SEND_FROM + ' nenalezen (dostupné: ' + aliases.join(', ') + ')');
+      opt.from = SEND_FROM;
+      GmailApp.sendEmail(to, subject, body, opt);
+      return 'odesláno z ' + SEND_FROM;
+    } catch (err) {
+      console.error('Odeslání z aliasu selhalo, zkouším hlavní adresu: ' + err);
+    }
   }
+  MailApp.sendEmail(to, subject, body, replyTo ? { name: SENDER_NAME, replyTo: replyTo } : { name: SENDER_NAME });
+  return 'odesláno z hlavní adresy účtu';
+}
+/** Test odesílání bez formuláře: spusťte v editoru, e-mail přijde na adresu účtu, výsledek je v protokolu. */
+function testEmail() {
+  var me = Session.getEffectiveUser().getEmail();
+  Logger.log(sendMail(me, 'Test odesílání objednávek', 'Pokud čteš tuto zprávu, odesílání funguje.', NOTIFY));
 }
 /** Jednorázově spusťte v editoru: vyvolá žádost o oprávnění k Gmailu a v protokolu ukáže dostupné aliasy. */
 function autorizace() { Logger.log('Aliasy: ' + GmailApp.getAliases().join(', ')); }
