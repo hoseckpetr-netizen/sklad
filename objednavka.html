@@ -448,7 +448,7 @@ function stepDone(){
   var o = S.sent;
   return '<div class="done"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path d="M30 52l14 14 27-30"/></svg></div>' +
     '<p class="eyebrow">' + (o.mail ? 'Ještě jeden klik' : 'Objednávka odeslána') + '</p><h1>' + (o.mail ? 'Dokonči <em>e-mailem</em>' : 'Díky, <em>' + esc(S.name.split(/\s+/)[0]) + '</em>!') + '</h1>' +
-    '<p class="lead" style="margin:10px auto 0">' + (o.mail ? 'Odesílací služba zatím není zapojená. Otevři předvyplněný e-mail a odešli ho klubu.' : 'Objednávku jsme přijali a potvrzení ti přijde e-mailem. Až bude oblečení nachystané, ozveme se s místem a časem vyzvednutí.') + '</p>' +
+    '<p class="lead" style="margin:10px auto 0">' + (o.mail ? 'Odesílací služba zatím není zapojená. Otevři předvyplněný e-mail a odešli ho klubu.' : 'Objednávku jsme přijali a potvrzení ti přijde e-mailem (zkontroluj i složku Spam). Až bude oblečení nachystané, ozveme se s místem a časem vyzvednutí.') + '</p>' +
     (o.mail ? '' : howBox()) + '<div class="code">' + esc(o.code) + '</div><div class="kv" style="justify-content:center;gap:8px"><span>Celkem</span><span style="color:var(--accent);font-weight:700">' + totalText() + '</span></div>' +
     '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">' +
     (o.mail ? '<a class="btn pri" href="' + esc(o.mail) + '">Otevřít e-mail' + ICON.send + '</a><button class="btn" type="button" id="copyBtn">Zkopírovat text</button>' : '') +
