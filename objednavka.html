@@ -47,7 +47,7 @@ header.top{position:sticky;top:0;z-index:30;margin:0 -14px;padding:calc(10px + e
 .rail button:disabled{cursor:default}
 @media(max-width:560px){.rail button span{display:none}.rail button i{margin-bottom:0}}
 
-.grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:16px;align-items:start}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:16px;align-items:start}
 @media(min-width:900px){.grid{grid-template-columns:minmax(0,1fr) 320px}}
 .panel{background:var(--glass);border:1px solid var(--glassb);border-radius:var(--r);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:20px 18px;box-shadow:0 20px 60px -30px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.05)}
 @media(min-width:600px){.panel{padding:26px 26px}}
@@ -63,17 +63,19 @@ h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
 /* ---------- hero ---------- */
 .hero{position:relative;display:grid;gap:8px;overflow:hidden;margin:-20px -18px 20px;padding:26px 18px 0;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(160deg,rgba(0,255,255,.10),rgba(59,130,246,.06) 55%,transparent)}
 @media(min-width:600px){.hero{margin:-26px -26px 22px;padding:34px 26px 0;grid-template-columns:1.1fr 1fr;align-items:center}}
-.stage{position:relative;height:250px;perspective:900px}
+.stage{position:relative;height:250px}
 @media(min-width:600px){.stage{height:320px}}
+.stage3d{position:absolute;inset:0;perspective:650px;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1);animation:tilt 9s ease-in-out infinite}
+@keyframes tilt{0%,100%{transform:rotateX(3deg) rotateY(-5deg)}50%{transform:rotateX(-3deg) rotateY(5deg)}}
 .stage::before{content:'';position:absolute;left:50%;top:52%;width:78%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(0,255,255,.28),transparent 66%);filter:blur(10px)}
-.stage .p{position:absolute;border-radius:16px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);box-shadow:0 18px 40px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.35) inset;overflow:hidden;transition:transform .25s ease-out;animation:float 6s ease-in-out infinite}
+.stage .p{position:absolute;border-radius:16px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);box-shadow:0 22px 46px -12px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.35) inset;overflow:hidden;transition:transform .25s ease-out;animation:float 6s ease-in-out infinite;transform-style:preserve-3d}
 .stage .p img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:8%}
-.stage .p:nth-child(1){left:2%;top:8%;width:36%;height:52%;--r:-7deg;animation-delay:-1s}
-.stage .p:nth-child(2){left:30%;top:0;width:30%;height:78%;--r:2deg;z-index:2;animation-delay:-3s}
-.stage .p:nth-child(3){right:2%;top:4%;width:30%;height:46%;--r:7deg;animation-delay:-2s}
-.stage .p:nth-child(4){left:10%;bottom:0;width:30%;height:38%;--r:5deg;animation-delay:-4s;z-index:3}
-.stage .p:nth-child(5){right:6%;bottom:2%;width:34%;height:46%;--r:-5deg;animation-delay:-5s;z-index:3}
-@keyframes float{0%,100%{transform:translateY(0) rotate(var(--r))}50%{transform:translateY(-9px) rotate(calc(var(--r) + 1.5deg))}}
+.stage .p:nth-child(1){left:2%;top:8%;width:36%;height:52%;--r:-7deg;--z:10px;animation-delay:-1s}
+.stage .p:nth-child(2){left:30%;top:0;width:30%;height:78%;--r:2deg;--z:55px;z-index:2;animation-delay:-3s}
+.stage .p:nth-child(3){right:2%;top:4%;width:30%;height:46%;--r:7deg;--z:0px;animation-delay:-2s}
+.stage .p:nth-child(4){left:10%;bottom:0;width:30%;height:38%;--r:5deg;--z:75px;animation-delay:-4s;z-index:3}
+.stage .p:nth-child(5){right:6%;bottom:2%;width:34%;height:46%;--r:-5deg;--z:65px;animation-delay:-5s;z-index:3}
+@keyframes float{0%,100%{transform:translateZ(var(--z,0px)) translateY(0) rotate(var(--r))}50%{transform:translateZ(var(--z,0px)) translateY(-9px) rotate(calc(var(--r) + 1.5deg))}}
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:5px 11px;border-radius:99px;border:1px solid var(--glassb);background:rgba(255,255,255,.04);color:var(--muted)}
 .pill b{color:var(--text);font-weight:600}
@@ -88,6 +90,7 @@ h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
 .fld.bad input{border-color:var(--red);box-shadow:0 0 0 4px rgba(248,113,113,.12)}
 .hint{font-size:12px;color:var(--red);margin:6px 4px 0;min-height:0}
 .lbl{display:block;font-size:12px;color:var(--muted);margin:22px 0 8px;letter-spacing:.02em}
+.lbl.strong{font-weight:700;font-size:15px;line-height:1.2;color:var(--text);letter-spacing:normal;margin:26px 0 10px}
 .lbl.bad{color:var(--red)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1.5px solid var(--border);background:rgba(11,13,16,.45);border-radius:14px;padding:10px 13px;font-size:13px;color:var(--text);transition:all .18s;text-align:left;line-height:1.2}
@@ -104,7 +107,7 @@ h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
 .set.big .pr{font-size:20px}
 .set.big .th{width:48px;height:58px}
 .set.big .thumbs{flex-wrap:wrap}
-.set{position:relative;text-align:left;border:1.5px solid var(--border);border-radius:18px;padding:14px;background:rgba(11,13,16,.5);transition:all .22s;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.set{position:relative;text-align:left;border:1.5px solid var(--border);border-radius:18px;padding:14px;background:rgba(11,13,16,.5);transition:all .22s;overflow:hidden;display:flex;flex-direction:column;gap:10px;cursor:pointer}
 .set:hover{transform:translateY(-2px);border-color:#3a424b}
 .set.on{border-color:var(--accent);background:linear-gradient(160deg,rgba(0,255,255,.14),rgba(59,130,246,.06));box-shadow:0 0 0 4px rgba(0,255,255,.08),0 16px 40px -18px rgba(0,255,255,.5)}
 .set .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -121,17 +124,51 @@ h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
 .thumbs .th.off{opacity:.18;filter:grayscale(1)}
 .badge{position:absolute;top:0;right:0;background:linear-gradient(100deg,var(--accent),#38bdf8);color:#04201f;font-size:10px;font-weight:700;padding:4px 12px 4px 14px;border-radius:0 0 0 12px;letter-spacing:.06em;text-transform:uppercase}
 
-.xgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-@media(min-width:600px){.xgrid{grid-template-columns:repeat(3,1fr)}}
-.xt{position:relative;text-align:left;border:1.5px solid var(--border);border-radius:16px;background:rgba(11,13,16,.5);padding:8px 8px 10px;transition:all .2s;display:flex;flex-direction:column;gap:8px}
-.xt:hover{transform:translateY(-2px);border-color:#3a424b}
+.xgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:460px){.xgrid{gap:12px}}
+@media(min-width:600px){.xgrid{gap:16px}}
+.xt{position:relative;text-align:left;border:1.5px solid var(--border);border-radius:16px;background:rgba(11,13,16,.5);padding:7px;transition:border-color .2s,box-shadow .4s;display:flex;flex-direction:column;gap:7px;min-width:0}
+.xt .pic{min-width:0}
+.xt .pic img{min-width:0;max-width:100%}
+@media(min-width:460px){.xt{padding:9px;border-radius:18px}}
+@media(min-width:600px){.xt{padding:12px;gap:10px}}
+.xt:hover{border-color:#3a424b;box-shadow:0 20px 36px -18px rgba(0,255,255,.35)}
 .xt.on{border-color:var(--accent);box-shadow:0 0 0 4px rgba(0,255,255,.08);background:rgba(0,255,255,.07)}
-.xt .pic{aspect-ratio:1/1.05;border-radius:11px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;position:relative}
-.xt .pic img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:8%}
+.xt .pic{aspect-ratio:1/1.18;border-radius:11px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;position:relative;perspective:700px}
+.xt .pic img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:5%;transform-style:preserve-3d;transition:transform .4s cubic-bezier(.2,.8,.2,1);animation:xtFloat 5.5s ease-in-out infinite}
+.xt:nth-child(1) .pic img{animation-delay:-.2s}.xt:nth-child(2) .pic img{animation-delay:-1.4s}.xt:nth-child(3) .pic img{animation-delay:-2.6s}
+.xt:nth-child(4) .pic img{animation-delay:-.8s}.xt:nth-child(5) .pic img{animation-delay:-2s}.xt:nth-child(6) .pic img{animation-delay:-3.2s}
+@keyframes xtFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-4px) rotate(.7deg)}}
+.xt:hover .pic img{transform:translateY(-3px) rotateX(10deg) rotateY(-10deg) scale(1.08);animation-play-state:paused}
 .xt .tick{position:absolute;top:7px;right:7px;background:rgba(11,13,16,.55);border-color:rgba(255,255,255,.4)}
-.xt .nm{font-weight:600;font-size:12.5px;line-height:1.2;padding:0 3px}
-.xt .pr{font-size:11.5px;color:var(--muted);padding:0 3px}
+.xt .nm{font-weight:600;font-size:12px;line-height:1.2;padding:0 2px}
+@media(min-width:460px){.xt .nm{font-size:13px}}
+@media(min-width:600px){.xt .nm{font-size:14.5px}}
+.xt .pr{font-size:11px;color:var(--muted);padding:0 2px}
+@media(min-width:600px){.xt .pr{font-size:13px}}
 .xt.on .pr{color:var(--accent)}
+.xt .mag,.sz .mag{position:absolute;top:7px;left:7px;width:26px;height:26px;border-radius:50%;background:rgba(11,13,16,.55);border:1.5px solid rgba(255,255,255,.4);color:#fff;display:grid;place-items:center;z-index:2;padding:0;transition:background .15s,transform .15s}
+.xt .mag:hover,.sz .mag:hover{background:rgba(11,13,16,.85);transform:scale(1.08)}
+.xt .mag svg,.sz .mag svg{width:13px;height:13px}
+@media(min-width:460px){.xt .mag{width:28px;height:28px}}
+
+/* ---------- výběr kusů samostatně – 3×2 grid, bez lupy ---------- */
+.pickrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+@media(min-width:460px){.pickrow{gap:12px}}
+@media(min-width:600px){.pickrow{gap:16px}}
+.pr6{min-width:0;position:relative;text-align:center;border:1.5px solid var(--border);border-radius:14px;background:rgba(11,13,16,.5);padding:7px 5px 9px;transition:all .2s;cursor:pointer}
+@media(min-width:460px){.pr6{border-radius:16px;padding:9px 7px 11px}}
+.pr6:hover{transform:translateY(-2px);border-color:#3a424b}
+.pr6.on{border-color:var(--accent);background:rgba(0,255,255,.07);box-shadow:0 0 0 3px rgba(0,255,255,.08)}
+.pr6 .pic{aspect-ratio:1/1;border-radius:10px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;position:relative}
+.pr6 .pic img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:9%}
+.pr6 .tick{position:absolute;top:5px;right:5px;width:18px;height:18px;background:rgba(11,13,16,.55);border-color:rgba(255,255,255,.4)}
+.pr6 .tick svg{width:10px;height:10px}
+.pr6 .nm{font-weight:600;font-size:10px;line-height:1.2;margin-top:6px;padding:0 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr6 .pr{font-size:9px;color:var(--muted)}
+.pr6.on .pr{color:var(--accent)}
+@media(min-width:460px){.pr6 .nm{font-size:11.5px}.pr6 .pr{font-size:10px}}
+@media(min-width:600px){.pr6 .nm{font-size:12.5px}.pr6 .pr{font-size:11px}}
 .st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border-radius:8px;padding:3px 9px;border:1px solid}
 .st::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
 .st.in{color:var(--green);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
@@ -149,24 +186,26 @@ h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
 .note{display:flex;gap:10px;align-items:center;background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.2);border-radius:14px;padding:11px 14px;font-size:12.5px;color:#bff;margin-top:14px}
 
 /* ---------- velikosti ---------- */
-.items{display:grid;gap:12px;margin-top:18px}
-.sz{display:grid;grid-template-columns:84px 1fr;gap:14px;align-items:center;border:1.5px solid var(--border);border-radius:18px;padding:10px;background:rgba(11,13,16,.5);transition:border-color .2s}
-@media(min-width:600px){.sz{grid-template-columns:104px 1fr}}
+.items{display:grid;gap:8px;margin-top:14px}
+.sz{display:grid;grid-template-columns:76px 1fr;gap:11px;align-items:center;border:1.5px solid var(--border);border-radius:16px;padding:8px;background:rgba(11,13,16,.5);transition:border-color .2s}
+@media(min-width:600px){.sz{grid-template-columns:92px 1fr;padding:10px;gap:14px}}
 .sz.ok{border-color:rgba(52,211,153,.5)}
 .sz.bad{border-color:var(--red);animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.sz .pic{aspect-ratio:1/1.1;border-radius:12px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden}
+.sz .pic{aspect-ratio:1/1.1;border-radius:11px;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);overflow:hidden;position:relative}
 .sz .pic img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;padding:8%}
-.sz .nm{font-weight:600;font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.sz .nm{font-weight:600;font-size:13.5px;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .sz .nm .b{font-size:10px;font-weight:600;border-radius:7px;padding:2px 7px;background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.35)}
 .sz.ok .nm .b{background:rgba(52,211,153,.1);color:var(--green);border-color:rgba(52,211,153,.4)}
-.sizes{display:flex;flex-wrap:wrap;gap:6px}
-.sizes button{min-width:44px;height:40px;padding:0 10px;border-radius:12px;border:1.5px solid var(--border);background:rgba(11,13,16,.55);font-weight:500;font-size:13px;transition:all .15s}
+.sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.sizes button{height:34px;padding:0 2px;border-radius:9px;border:1.5px solid var(--border);background:rgba(11,13,16,.55);font-weight:500;font-size:12px;transition:all .15s}
+@media(min-width:600px){.sizes button{height:38px;font-size:13px;border-radius:11px}}
 .sizes button:hover{border-color:#3a424b}
-.sizes button.on{background:var(--accent);color:#04201f;border-color:var(--accent);font-weight:700;transform:scale(1.06);box-shadow:0 6px 20px -6px rgba(0,255,255,.7)}
-.same{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:12px 14px;border-radius:16px;border:1px dashed #3a424b}
-.same span{font-size:12px;color:var(--muted)}
-.same .sizes button{height:34px;min-width:40px;font-size:12px}
+.sizes button.on{background:var(--accent);color:#04201f;border-color:var(--accent);font-weight:700;transform:scale(1.05);box-shadow:0 6px 20px -6px rgba(0,255,255,.7)}
+.same{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:14px;border:1px dashed #3a424b}
+.same span{font-size:12px;color:var(--muted);flex:1 1 100%}
+.same .sizes{flex:1 1 100%}
+.same .sizes button{height:30px;font-size:11.5px}
 
 /* ---------- shrnutí ---------- */
 .ticket{position:relative;border-radius:20px;background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid var(--glassb);margin-top:18px;overflow:hidden}
@@ -236,6 +275,16 @@ aside.sum .mini{color:var(--muted);font-size:12px;margin:0 0 12px}
 
 #toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:70;background:#222831;border:1px solid var(--red);color:#fecaca;border-radius:14px;padding:11px 18px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;max-width:92vw;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.6)}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- lightbox (zvětšení fotky) ---------- */
+.lightbox{position:fixed;inset:0;z-index:80;background:rgba(5,6,8,.88);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .22s}
+.lightbox.show{opacity:1;pointer-events:auto}
+.lightbox .lbinner{position:relative;max-width:min(92vw,560px);max-height:88vh;display:flex;flex-direction:column;align-items:center;gap:12px;transform:scale(.92);transition:transform .22s}
+.lightbox.show .lbinner{transform:scale(1)}
+.lightbox img{width:100%;max-height:72vh;object-fit:contain;mix-blend-mode:multiply;background:linear-gradient(150deg,#f6f9fc,#d9e3ef);border-radius:20px;box-shadow:0 30px 70px -20px rgba(0,0,0,.8);padding:22px}
+.lbcap{color:var(--text);font-size:13.5px;font-weight:600;text-align:center}
+.lbclose{position:absolute;top:-44px;right:-6px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--glassb);color:#fff;font-size:17px;display:grid;place-items:center;z-index:2}
+.lbclose:hover{background:rgba(255,255,255,.16)}
 .hp{position:absolute;left:-9999px;opacity:0}
 .foot{text-align:center;color:#59616a;font-size:11px;margin-top:26px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -267,6 +316,9 @@ aside.sum .mini{color:var(--muted);font-size:12px;margin:0 0 12px}
   <button class="btn pri" id="next" type="button"></button>
 </div></div>
 <div id="toast" role="alert"></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="lbinner"><button type="button" class="lbclose" id="lbClose" aria-label="Zavřít">✕</button><img id="lbImg" src="" alt=""><div class="lbcap" id="lbCap"></div></div>
+</div>
 
 <script>
 'use strict';
@@ -290,9 +342,7 @@ var ITEMS = [
 ];
 var ALL = ITEMS.map(function(i){ return i.k; });
 var SET = { k:'Kompletní set', price:2800, sub:'Všech 6 kusů v jednom balení' };   // obsahuje všechny kusy z ITEMS
-var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
-var KATS = [['U7','Minipřípravka'],['U9','Mladší přípravka'],['U11','Starší přípravka'],['U13','Mladší žáci'],['U15','Starší žáci'],['U17','Mladší dorost'],['U19','Starší dorost'],['Dospělí','']];
-var KAT_FULL = { 'U7':'U7 – Minipřípravka','U9':'U9 – Mladší přípravka','U11':'U11 – Starší přípravka','U13':'U13 – Mladší žáci','U15':'U15 – Starší žáci','U17':'U17 – Mladší dorost','U19':'U19 – Starší dorost','Dospělí':'Dospělí' };
+var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL'];
 /* Demo sklad (jen ?demo=1): klíč "kus|velikost" = skladem */
 var DEMO_STOCK = (function(){ var m = { 'Triko':['3XS','2XS'], 'Kraťasy':['3XS','S','M'], 'Tepláková souprava':['4XS','3XS','2XS','XS','S','M'], 'Šusťáková bunda':['3XS','XS','S','M','L'], 'Zimní bunda':['3XS','XS','S','M','L'], 'Batoh':['-'] }, o = {};
   Object.keys(m).forEach(function(k){ m[k].forEach(function(z){ o[k + '|' + z] = true; }); }); return o; })();
@@ -300,11 +350,11 @@ var SIZECOL = { 'Zimní bunda':'Velikost zimní bundy','Šusťáková bunda':'Ve
 var STEPS = ['Hráč','Výběr','Velikosti','Shrnutí'];
 
 /* ================================ STAV =================================== */
-var S = { step:0, name:'', kat:'', email:'', set:false, pick:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false };
+var S = { step:0, name:'', email:'', set:false, pick:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false };
 var STOCK = null;   // { 'Triko|M': true, ... } = fyzicky skladem; null = sklad neznámý
 var DKEY = 'sklad_objednavka_v2';
-try { var d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) ['name','kat','email','set','pick','sizes','note'].forEach(function(k){ if (d[k] != null) S[k] = d[k]; }); } catch(e){}
-function save(){ try { localStorage.setItem(DKEY, JSON.stringify({ name:S.name, kat:S.kat, email:S.email, set:S.set, pick:S.pick, sizes:S.sizes, note:S.note })); } catch(e){} }
+try { var d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) ['name','email','set','pick','sizes','note'].forEach(function(k){ if (d[k] != null) S[k] = d[k]; }); } catch(e){}
+function save(){ try { localStorage.setItem(DKEY, JSON.stringify({ name:S.name, email:S.email, set:S.set, pick:S.pick, sizes:S.sizes, note:S.note })); } catch(e){} }
 
 /* ================================ POMOCNÉ ================================ */
 function $(id){ return document.getElementById(id); }
@@ -312,10 +362,14 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ ret
 function item(k){ return ITEMS.filter(function(i){ return i.k===k; })[0]; }
 function sumOf(list){ return list.reduce(function(a, k){ return a + item(k).price; }, 0); }
 function kc(n){ return n.toLocaleString('cs-CZ').replace(/\s/g,'\u00a0') + '\u00a0Kč'; }
-function img(k){ return 'img/' + item(k).img + '.webp'; }
+function imgPath(name){ return (window.IMG_DATA && window.IMG_DATA[name]) || ('img/' + name + '.webp'); }
+function img(k){ return imgPath(item(k).img); }
 var ICON = { check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   next:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
-  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>' };
+  send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+  zoom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>' };
+function openZoom(payload){ var a = payload.split('|'), lb = $('lightbox'); $('lbImg').src = imgPath(a[0]); $('lbImg').alt = a[1]; $('lbCap').textContent = a[1]; lb.classList.add('show'); lb.setAttribute('aria-hidden','false'); document.body.style.overflow = 'hidden'; }
+function closeZoom(){ var lb = $('lightbox'); lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; }
 
 function chosen(){ return S.set ? ALL.slice() : ALL.filter(function(k){ return S.pick.indexOf(k) !== -1; }); }   // pořadí podle katalogu
 function total(){ return S.set ? SET.price : sumOf(chosen()); }
@@ -353,7 +407,7 @@ function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
 function nameOk(v){ return v.trim().split(/\s+/).filter(Boolean).length >= 2 && v.trim().length >= 5; }
 
 function valid(step){
-  if (step === 0) return nameOk(S.name) && !!S.kat && emailOk(S.email);
+  if (step === 0) return nameOk(S.name) && emailOk(S.email);
   if (step === 1) return chosen().length > 0;
   if (step === 2) return sizedItems().every(function(k){ return !!S.sizes[k]; });
   if (step === 3) return S.consent;
@@ -378,7 +432,7 @@ function renderChrome(){
 }
 function renderAside(){
   var ch = chosen();
-  $('aside').innerHTML = '<h3>Tvůj set</h3><p class="mini">' + (S.name ? esc(S.name) + (S.kat ? ' · ' + esc(S.kat) : '') : 'Skládáme objednávku…') + '</p>' +
+  $('aside').innerHTML = '<h3>Tvůj set</h3><p class="mini">' + (S.name ? esc(S.name) : 'Skládáme objednávku…') + '</p>' +
     (ch.length ? '<div class="stack">' + ch.map(function(k){ return '<div class="th"><img src="' + img(k) + '" alt=""></div>'; }).join('') + '</div>' +
       ch.map(function(k){ var it = item(k); return '<div class="kv"><span>' + esc(k) + '</span><span>' + (S.sizes[k] ? esc(S.sizes[k]) : (it.size ? '<span style="color:var(--amber)">?</span>' : '–')) + '</span></div>'; }).join('')
     : '<div class="empty">Zatím nic nevybráno</div>') +
@@ -389,34 +443,33 @@ function stepHero(){
   return '<div class="hero"><div><p class="eyebrow">Sezóna 2026/27</p><h1>Sestav si svůj <em>klubový set</em></h1>' +
     '<p class="lead">Čtyři rychlé kroky: údaje o hráči, výběr oblečení, velikosti a hotovo. Objednávku pak připravíme k vyzvednutí a pošleme e-mail.</p>' +
     '<div class="stats"><span class="pill"><b>4</b> kroky</span><span class="pill"><b>~2</b> min</span><span class="pill">Givova</span></div></div>' +
-    '<div class="stage" id="stage">' + ['zimni','teplaky','sustak','triko','kratasy'].map(function(k){ return '<div class="p"><img src="img/' + k + '.webp" alt=""></div>'; }).join('') + '</div></div>';
+    '<div class="stage" id="stage"><div class="stage3d" id="stage3d">' + ['zimni','teplaky','sustak','triko','kratasy'].map(function(k){ return '<div class="p"><img src="' + imgPath(k) + '" alt=""></div>'; }).join('') + '</div></div></div>';
 }
 function step0(){
   var t = S.tried[0];
   return stepHero() +
     '<div class="fld' + (t && !nameOk(S.name) ? ' bad' : '') + '"><input id="f_name" autocomplete="name" placeholder=" " value="' + esc(S.name) + '"><label for="f_name">Jméno a příjmení hráče</label></div>' +
     (t && !nameOk(S.name) ? '<div class="hint">Napiš jméno i příjmení.</div>' : '') +
-    '<span class="lbl' + (t && !S.kat ? ' bad' : '') + '">Kategorie</span><div class="chips">' + KATS.map(function(c){
-      return '<button type="button" class="chip' + (S.kat === c[0] ? ' on' : '') + '" data-kat="' + esc(c[0]) + '">' + esc(c[0]) + (c[1] ? '<small>' + esc(c[1]) + '</small>' : '') + '</button>'; }).join('') + '</div>' +
     '<div class="fld' + (t && !emailOk(S.email) ? ' bad' : '') + '"><input id="f_email" type="email" inputmode="email" autocomplete="email" placeholder=" " value="' + esc(S.email) + '"><label for="f_email">E-mail pro potvrzení a vyzvednutí</label></div>' +
     (t && !emailOk(S.email) ? '<div class="hint">Zadej platný e-mail.</div>' : '');
 }
 function step1(){
   var t = S.tried[1], ch = chosen(), sum = sumOf(ch), missing = ALL.filter(function(k){ return ch.indexOf(k) === -1; });
-  var setCard = '<button type="button" class="set big' + (S.set ? ' on' : '') + '" data-set="1"><span class="badge">Nejvýhodnější · ušetříš ' + kc(saving()) + '</span>' +
+  var setCard = '<div class="set big' + (S.set ? ' on' : '') + '" role="button" tabindex="0" data-set="1"><span class="badge">Nejvýhodnější · ušetříš ' + kc(saving()) + '</span>' +
     '<div class="top"><div class="nm">' + esc(SET.k) + '<small>' + esc(SET.sub) + '</small></div><span class="pr">' + kc(SET.price) + '</span><span class="tick">' + ICON.check + '</span></div>' +
-    '<div class="thumbs">' + ALL.map(function(k){ return '<div class="th"><img src="' + img(k) + '" alt=""></div>'; }).join('') + '</div></button>';
+    '<div class="xgrid setgrid">' + ALL.map(function(k){ var it = item(k);
+      return '<div class="xt"><div class="pic"><img src="' + imgPath(it.img) + '" alt="' + esc(k) + '"><button type="button" class="mag" data-zoom="' + esc(it.img) + '|' + esc(k) + '" aria-label="Zvětšit fotku – ' + esc(k) + '">' + ICON.zoom + '</button></div></div>'; }).join('') + '</div></div>';
   var tiles = ITEMS.map(function(it){ var on = ch.indexOf(it.k) !== -1;
-    return '<button type="button" class="xt' + (on ? ' on' : '') + '" data-pick="' + esc(it.k) + '"><div class="pic"><img src="img/' + it.img + '.webp" alt=""><span class="tick">' + ICON.check + '</span></div>' +
-      '<div class="nm">' + esc(it.k) + '</div><div class="pr">' + kc(it.price) + '</div></button>'; }).join('');
+    return '<div class="pr6' + (on ? ' on' : '') + '" role="button" tabindex="0" data-pick="' + esc(it.k) + '"><div class="pic"><img src="' + imgPath(it.img) + '" alt="' + esc(it.k) + '"><span class="tick">' + ICON.check + '</span></div>' +
+      '<div class="nm">' + esc(it.k) + '</div><div class="pr">' + kc(it.price) + '</div></div>'; }).join('');
   // samostatně vybrané kusy vyjdou dráž než set -> nabídnout set
   var nudge = '';
   if (!S.set && ch.length && sum >= SET.price) nudge = '<div class="note" style="flex-wrap:wrap">' + (missing.length ? 'Vybrané kusy stojí ' + kc(sum) + '. Kompletní set za ' + kc(SET.price) + ' obsahuje navíc ' + esc(missing.join(', ')) + '.' : 'Vybral jsi všechno. Kompletní set je o ' + kc(sum - SET.price) + ' levnější.') +
     ' <button type="button" class="btn pri" style="height:36px;padding:0 14px;font-size:13px" data-takeset="1">Vzít kompletní set</button></div>';
   return '<p class="eyebrow">Krok 2</p><h2>Co chceš objednat?</h2><p class="lead">Nejvýhodnější je kompletní set. Chceš-li jen něco, vyber si kusy samostatně.</p>' +
     '<div class="sets">' + setCard + '</div>' +
-    '<span class="lbl' + (t && !ch.length ? ' bad' : '') + '">Nebo vyber kusy samostatně' + (S.set ? ' (v setu jsou všechny, klepnutím některý odeber)' : '') + '</span>' +
-    '<div class="xgrid">' + tiles + '</div>' + nudge;
+    '<span class="lbl strong' + (t && !ch.length ? ' bad' : '') + '">Nebo vyber kusy samostatně' + (S.set ? ' (v setu jsou všechny, klepnutím některý odeber)' : '') + '</span>' +
+    '<div class="pickrow">' + tiles + '</div>' + nudge;
 }
 function step2(){
   var t = S.tried[2], list = chosen(), sized = sizedItems();
@@ -425,7 +478,7 @@ function step2(){
     (STOCK ? '<div class="legend"><span><i style="background:var(--green)"></i>Skladem: připraveno v rámci několika dní</span><span><i style="background:var(--amber)"></i>Tečka u velikosti = skladem u dodavatele</span></div>' : '') +
     '<div class="items">' + list.map(function(k){ var it = item(k), v = S.sizes[k];
       var ok = !it.size || v;
-      return '<div class="sz' + (ok ? ' ok' : (t ? ' bad' : '')) + '"><div class="pic"><img src="img/' + it.img + '.webp" alt=""></div><div><div class="nm"><span>' + esc(k) + '</span><span class="b">' + (it.size ? (v ? esc(v) : 'vyber') : 'univerzální') + '</span></div>' +
+      return '<div class="sz' + (ok ? ' ok' : (t ? ' bad' : '')) + '"><div class="pic"><img src="' + imgPath(it.img) + '" alt="' + esc(k) + '"><button type="button" class="mag" data-zoom="' + esc(it.img) + '|' + esc(k) + '" aria-label="Zvětšit fotku – ' + esc(k) + '">' + ICON.zoom + '</button></div><div><div class="nm"><span>' + esc(k) + '</span><span class="b">' + (it.size ? (v ? esc(v) : 'vyber') : 'univerzální') + '</span></div>' +
         (it.size ? '<div class="sizes">' + SIZES.map(function(z){ return '<button type="button" class="' + (v === z ? 'on' : '') + (STOCK && !STOCK[k + '|' + z] ? ' oos' : '') + '" data-sz="' + esc(k) + '|' + z + '">' + z + '</button>'; }).join('') + '</div>' : '') +
         '<div class="avail">' + badge(k) + '</div></div></div>'; }).join('') + '</div>' +
     (!sized.length ? '<div class="note">V objednávce není nic, co by mělo velikost. Pokračuj dál.</div>' : '');
@@ -433,7 +486,7 @@ function step2(){
 function step3(){
   var ch = chosen();
   return '<p class="eyebrow">Krok 4</p><h2>Skoro hotovo</h2><p class="lead">Zkontroluj si objednávku a dostupnost jednotlivých kusů.</p>' +
-    '<div class="ticket"><div class="part"><div class="kv"><span>Hráč</span><span>' + esc(S.name) + '</span></div><div class="kv"><span>Kategorie</span><span>' + esc(KAT_FULL[S.kat] || S.kat) + '</span></div><div class="kv"><span>E-mail</span><span>' + esc(S.email) + '</span></div></div>' +
+    '<div class="ticket"><div class="part"><div class="kv"><span>Hráč</span><span>' + esc(S.name) + '</span></div><div class="kv"><span>E-mail</span><span>' + esc(S.email) + '</span></div></div>' +
     '<div class="perf"></div><div class="part"><div class="kv" style="padding-top:0"><span>Objednávka</span><span>' + (S.set ? esc(SET.k) + ' · ' + kc(SET.price) : 'Jednotlivé kusy') + '</span></div>' +
     ch.map(function(k){ var it = item(k);
       return '<div class="line"><div class="th"><img src="' + img(k) + '" alt=""></div><div><div class="nm">' + esc(k) + '</div><div class="sub">' + (it.size ? 'Velikost ' + esc(S.sizes[k] || '?') : 'Univerzální') + '</div><div class="avail" style="margin-top:4px;min-height:0">' + badge(k) + '</div></div>' +
@@ -469,7 +522,7 @@ function next(){
   if (S.sent || S.busy) return;
   if (!valid(S.step)) {
     S.tried[S.step] = true; render(true);
-    var msg = ['Doplň jméno, kategorii a e-mail.', 'Vyber set nebo aspoň jeden kus.', 'Vyber všechny velikosti.', 'Potvrď souhlas se zpracováním údajů.'][S.step];
+    var msg = ['Doplň jméno a e-mail.', 'Vyber set nebo aspoň jeden kus.', 'Vyber všechny velikosti.', 'Potvrď souhlas se zpracováním údajů.'][S.step];
     toast(msg); var bad = document.querySelector('.bad'); if (bad) bad.scrollIntoView({ block:'center', behavior:'smooth' });
     return;
   }
@@ -481,7 +534,7 @@ function payload(){
   var ch = chosen();
   function lab(k){ return k + ' – ' + item(k).price + ' Kč'; }
   var o = {
-    'Jméno a příjmení': S.name.trim(), 'Kategorie': KAT_FULL[S.kat] || S.kat, 'E-mail': S.email.trim(),
+    'Jméno a příjmení': S.name.trim(), 'E-mail': S.email.trim(),
     'Typ setu': S.set ? SET.k + ' – ' + SET.price + ' Kč' : 'Jednotlivé kusy',
     'Volitelné položky': S.set ? '' : ch.map(lab).join(', '),
     'Poznámka': S.note.trim(), 'Celková cena': total() + ' Kč'
@@ -522,13 +575,14 @@ function confetti(){
 
 /* ============================== UDÁLOSTI ================================= */
 document.addEventListener('click', function(e){
-  var t = e.target.closest('[data-go],[data-kat],[data-set],[data-pick],[data-takeset],[data-sz],[data-all],#next,#back,#again,#copyBtn'); if (!t) return;
+  var t = e.target.closest('[data-go],[data-set],[data-pick],[data-takeset],[data-sz],[data-all],[data-zoom],#next,#back,#again,#copyBtn,#lbClose,#lightbox'); if (!t) return;
   if (t.id === 'next') return next();
   if (t.id === 'back') return S.step > 0 && go(S.step - 1);
-  if (t.id === 'again') { S = { step:0, name:'', kat:'', email:'', set:false, pick:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false }; return render(); }
+  if (t.id === 'again') { S = { step:0, name:'', email:'', set:false, pick:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false }; return render(); }
   if (t.id === 'copyBtn') { var txt = S._body || ''; if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ t.textContent = 'Zkopírováno ✓'; }); return; }
+  if (t.id === 'lbClose' || t.id === 'lightbox') return closeZoom();
+  if (t.dataset.zoom) return openZoom(t.dataset.zoom);
   if (t.dataset.go != null) return go(+t.dataset.go);
-  if (t.dataset.kat) { S.kat = t.dataset.kat; save(); Array.prototype.forEach.call(document.querySelectorAll('[data-kat]'), function(c){ c.classList.toggle('on', c === t); }); var lb = document.querySelector('.lbl.bad'); if (lb) lb.classList.remove('bad'); return renderChrome(); }
   if (t.dataset.set) { S.set = !S.set; if (S.set) S.pick = []; save(); return render(true); }       // kompletní set zapnout / zrušit
   if (t.dataset.takeset) { S.set = true; S.pick = []; save(); return render(true); }
   if (t.dataset.pick) {
@@ -547,13 +601,22 @@ document.addEventListener('input', function(e){
   save(); renderAside(); if (id === 'f_consent') e.target.closest('.consent').classList.remove('bad');
   var f = e.target.closest('.fld'); if (f) f.classList.remove('bad');
 });
-document.addEventListener('keydown', function(e){ if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); next(); } });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); next(); }
+  else if (e.key === 'Escape') { closeZoom(); }
+  else if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-pick],[data-set]')) { e.preventDefault(); e.target.click(); }
+});
 // jemný 3D náklon hlavního vizuálu
 document.addEventListener('pointermove', function(e){
-  var st = $('stage'); if (!st || e.pointerType === 'touch') return;
-  var r = st.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-  Array.prototype.forEach.call(st.children, function(c, i){ var d = (i % 3 + 1) * 5; c.style.translate = (x * d) + 'px ' + (y * d) + 'px'; });
+  var st = $('stage'), st3 = $('stage3d'); if (!st || !st3 || e.pointerType === 'touch') return;
+  var r = st.getBoundingClientRect(), x = Math.max(-.5, Math.min(.5, (e.clientX - r.left) / r.width - .5)), y = Math.max(-.5, Math.min(.5, (e.clientY - r.top) / r.height - .5));
+  st3.style.animation = 'none';
+  st3.style.transform = 'rotateX(' + (-y * 16) + 'deg) rotateY(' + (x * 20) + 'deg)';
+  Array.prototype.forEach.call(st3.children, function(c, i){ var d = (i % 3 + 1) * 6; c.style.translate = (x * d) + 'px ' + (y * d) + 'px'; });
 });
+document.addEventListener('pointerleave', function(e){
+  if (e.target && e.target.id === 'stage') { var st3 = $('stage3d'); if (st3) { st3.style.transform = ''; st3.style.animation = ''; } }
+}, true);
 render(true);
 loadStock();
 </script>
