@@ -177,9 +177,9 @@ function buildSeed() {
   var ideal = { 'Triko':[5,5,10,20,20,5,5,0,0,0], 'Kraťasy':[5,5,10,20,20,5,5,0,0,0], 'Tepláková souprava':[5,5,10,20,20,5,5,0,0,0],
     'Šusťáková bunda':[5,5,10,20,20,5,5,0,0,0], 'Zimní bunda':[5,5,10,20,20,5,5,0,0,0], 'Batoh':[0,0,0,0,0,0,0,0,0,10] };
   var now = new Date().toISOString(), s = {};
-  var prices = { 'Triko':250,'Kraťasy':250,'Tepláková souprava':800,'Šusťáková bunda':'','Zimní bunda':800,'Batoh':'' };
+  var prices = { 'Triko':300,'Kraťasy':300,'Tepláková souprava':900,'Šusťáková bunda':550,'Zimní bunda':850,'Batoh':450 };
   s.Katalog = ITEMS.map(function(n,i){ return ['i'+(i+1), n, 'polozka', prices[n], NOSIZE[n]?0:1, i+1, 1]; });
-  s.Katalog.push(['s1','Kompletní set','set',2300,1,10,1],['s2','Set bez zimní bundy','set','',1,11,1],
+  s.Katalog.push(['s1','Kompletní set','set',2800,1,10,1],['s2','Set bez zimní bundy','set','',1,11,1],
     ['s3','Set bez zimní bundy a batohu','set','',1,12,1],['s4','Triko a kraťasy','set',500,1,13,1]);
   s.Sety = [];
   ITEMS.forEach(function(i){ s.Sety.push(['Kompletní set',i,1]); });
@@ -236,13 +236,13 @@ var DemoB = {
     for (var t in SCHEMA) this.tabs[t] = [SCHEMA[t]].concat(seed[t] || []);
     var h = ['Časová značka','Jméno a příjmení hráče','Kategorie','Typ setu','Velikost zimní bundy','Velikost šusťákové bundy','Velikost teplákové soupravy','Velikost trika','Volitelné položky navíc','Poznámka','Souhlas s objednávkou','Velikost kraťasů','E-mail rodiče/zástupce','E-mail rodiče/zástupce','E-mail','Celková cena','KIS','Připraveno','Vydáno'];
     this.src = [h,
-      ['2.9.2026 21:33:34','Petr Pokus','U13 – Mladší žáci','Kompletní set  – 2 300 Kč','XS','2XS','XS','XS','','','ANO','','','','','2300 Kč','TRUE','FALSE','FALSE'],
-      ['6.9.2026 12:15:08','Samuel Mayer','U9 – Mladší přípravka','Kompletní set  – 2 300 Kč','3XS','3XS','2XS','3XS','','','ANO','','rodic@example.cz','','','2300 Kč','TRUE','FALSE','FALSE'],
-      ['7.9.2026 19:18:43','Tobiáš Harák','U7 – Minipřípravka','Triko – 250 Kč','NE','NE','NE','2XS','Kraťasy – 250 Kč','','ANO','3XS','','','','500 Kč','TRUE','FALSE','FALSE'],
-      ['8.9.2026 9:05:49','Oliver Wingfield','U13 – Mladší žáci','Kompletní set  – 2 300 Kč','S','S','S','S','','','ANO','S','','','','2300 Kč','TRUE','FALSE','FALSE'],
-      ['9.9.2026 6:56:17','Tomáš Medek','U13 – Mladší žáci','Triko – 250 Kč','NE','NE','NE','S','Kraťasy – 250 Kč','','ANO','M','','','','500 Kč','TRUE','FALSE','FALSE'],
+      ['2.9.2026 21:33:34','Petr Pokus','U13 – Mladší žáci','Kompletní set  – 2 800 Kč','XS','2XS','XS','XS','','','ANO','','','','','2800 Kč','TRUE','FALSE','FALSE'],
+      ['6.9.2026 12:15:08','Samuel Mayer','U9 – Mladší přípravka','Kompletní set  – 2 800 Kč','3XS','3XS','2XS','3XS','','','ANO','','rodic@example.cz','','','2800 Kč','TRUE','FALSE','FALSE'],
+      ['7.9.2026 19:18:43','Tobiáš Harák','U7 – Minipřípravka','Triko – 300 Kč','NE','NE','NE','2XS','Kraťasy – 300 Kč','','ANO','3XS','','','','600 Kč','TRUE','FALSE','FALSE'],
+      ['8.9.2026 9:05:49','Oliver Wingfield','U13 – Mladší žáci','Kompletní set  – 2 800 Kč','S','S','S','S','','','ANO','S','','','','2800 Kč','TRUE','FALSE','FALSE'],
+      ['9.9.2026 6:56:17','Tomáš Medek','U13 – Mladší žáci','Triko – 300 Kč','NE','NE','NE','S','Kraťasy – 300 Kč','','ANO','M','','','','600 Kč','TRUE','FALSE','FALSE'],
       ['3.9.2026 22:55:18','Veronika Hošková test!','U11 – Starší přípravka','Triko a kraťasy – 500 Kč','NE','NE','NE','L','Tepláková souprava – 800 Kč, Zimní bunda – 800 Kč','A jezdi!','ANO','','','','','2100 Kč','TRUE','FALSE','FALSE'],
-      ['18.9.2026 14:31:24','Vorontsov Mykola','U12','Kompletní set  – 2 300 Kč','S','S','S','S','','','ANO','S','','','','2300 Kč','TRUE','FALSE','FALSE']];
+      ['18.9.2026 14:31:24','Vorontsov Mykola','U12','Kompletní set  – 2 800 Kč','S','S','S','S','','','ANO','S','','','','2800 Kč','TRUE','FALSE','FALSE']];
   },
   addTabs: function(names){ var T = this.tabs; names.forEach(function(n){ T[n] = [SCHEMA[n]]; }); return Promise.resolve(); },
   meta: function(){ return Promise.resolve(Object.keys(this.tabs)); },
