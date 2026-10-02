@@ -15,6 +15,7 @@ var TOKEN = '';                       // volitelné: stejné jako CONFIG.TOKEN v
 var NOTIFY = 'info@fkslovany.cz';     // upozornění na novou objednávku ('' = nevyplňovat)
 var DB_SPREADSHEET_ID = '1b5p7-rNaOBGqZklXdTXRm4j0QuujEgTTRZ_j1rnjXLc'; // databáze aplikace Sklad (list Pohyby)
 var SENDER_NAME = 'FK Slovany Pardubice';
+var SEND_FROM = 'hosek@fkslovany.cz';   // odesílací adresa; musí být v Gmailu nastavená jako alias (Odesílat e-maily jako)
 var CONFIRM_PARENT = true;            // potvrzení objednávky rodiči (e-mail z formuláře)
 
 /** Stav skladu pro formulář: { "Triko|M": true, ... } = fyzicky skladem (součet pohybů > 0). */
@@ -61,15 +62,28 @@ function doPost(e) {
     lock.releaseLock();
 
     if (CONFIRM_PARENT && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(o['E-mail'])) {
-      try { MailApp.sendEmail(o['E-mail'], 'Objednávka klubového oblečení k nám dorazila!', confirmText(o), { name: SENDER_NAME, replyTo: NOTIFY || undefined }); } catch (mailErr) {}
+      try { sendMail(o['E-mail'], 'Objednávka klubového oblečení k nám dorazila!', confirmText(o), NOTIFY); } catch (mailErr) {}
     }
-    if (NOTIFY) MailApp.sendEmail(NOTIFY, 'Nová objednávka oblečení – ' + o['Jméno a příjmení'],
-      Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ': ' + o[k]; }).join('\n'));
+    if (NOTIFY) sendMail(NOTIFY, 'Nová objednávka oblečení – ' + o['Jméno a příjmení'],
+      Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return k + ': ' + o[k]; }).join('\n'), o['E-mail']);
     return out({ ok: true });
   } catch (err) {
     return out({ ok: false, error: String(err) });
   }
 }
+/** Odešle e-mail z aliasu SEND_FROM (přes Gmail); když alias nebo oprávnění chybí, odešle z hlavní adresy účtu. */
+function sendMail(to, subject, body, replyTo) {
+  try {
+    var opt = { name: SENDER_NAME };
+    if (replyTo) opt.replyTo = replyTo;
+    if (GmailApp.getAliases().indexOf(SEND_FROM) !== -1) opt.from = SEND_FROM;
+    GmailApp.sendEmail(to, subject, body, opt);
+  } catch (err) {
+    MailApp.sendEmail(to, subject, body, replyTo ? { name: SENDER_NAME, replyTo: replyTo } : { name: SENDER_NAME });
+  }
+}
+/** Jednorázově spusťte v editoru: vyvolá žádost o oprávnění k Gmailu a v protokolu ukáže dostupné aliasy. */
+function autorizace() { Logger.log('Aliasy: ' + GmailApp.getAliases().join(', ')); }
 function confirmText(o) {
   return 'Ahoj,\n\nobjednávka klubového oblečení pro ' + o['Jméno a příjmení'] + ' (' + o['Kategorie'] + ') k nám dorazila. Děkujeme!\n\n' +
     'Co jsi objednal(a):\n' + (o['Souhrn'] || (o['Typ setu'] + (o['Volitelné položky'] ? ', ' + o['Volitelné položky'] : ''))) + '\n\n' +
