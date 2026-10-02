@@ -132,6 +132,20 @@ h2{font-size:clamp(20px,3.6vw,26px);font-weight:700;line-height:1.15}
 .xt .nm{font-weight:600;font-size:12.5px;line-height:1.2;padding:0 3px}
 .xt .pr{font-size:11.5px;color:var(--muted);padding:0 3px}
 .xt.on .pr{color:var(--accent)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border-radius:8px;padding:3px 9px;border:1px solid}
+.st::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+.st.in{color:var(--green);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+.st.out{color:var(--amber);border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.avail{margin:8px 0 0;min-height:22px}
+.sizes button.oos{position:relative}
+.sizes button.oos::after{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.sizes button.on.oos::after{background:#04201f}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.how{margin-top:16px;padding:14px 16px;border-radius:16px;border:1px solid var(--glassb);background:rgba(255,255,255,.03);display:grid;gap:10px}
+.how h4{margin:0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.how p{margin:0;font-size:13px;line-height:1.5;color:var(--muted);display:grid;grid-template-columns:22px 1fr;gap:8px;text-align:left}
+.how p b{color:var(--text);font-weight:600}
 .note{display:flex;gap:10px;align-items:center;background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.2);border-radius:14px;padding:11px 14px;font-size:12.5px;color:#bff;margin-top:14px}
 
 /* ---------- velikosti ---------- */
@@ -279,11 +293,15 @@ var SET = { k:'Kompletní set', price:2800, sub:'Všech 6 kusů v jednom balení
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
 var KATS = [['U7','Minipřípravka'],['U9','Mladší přípravka'],['U11','Starší přípravka'],['U13','Mladší žáci'],['U15','Starší žáci'],['U17','Mladší dorost'],['U19','Starší dorost'],['Dospělí','']];
 var KAT_FULL = { 'U7':'U7 – Minipřípravka','U9':'U9 – Mladší přípravka','U11':'U11 – Starší přípravka','U13':'U13 – Mladší žáci','U15':'U15 – Starší žáci','U17':'U17 – Mladší dorost','U19':'U19 – Starší dorost','Dospělí':'Dospělí' };
+/* Demo sklad (jen ?demo=1): klíč "kus|velikost" = skladem */
+var DEMO_STOCK = (function(){ var m = { 'Triko':['3XS','2XS'], 'Kraťasy':['3XS','S','M'], 'Tepláková souprava':['4XS','3XS','2XS','XS','S','M'], 'Šusťáková bunda':['3XS','XS','S','M','L'], 'Zimní bunda':['3XS','XS','S','M','L'], 'Batoh':['-'] }, o = {};
+  Object.keys(m).forEach(function(k){ m[k].forEach(function(z){ o[k + '|' + z] = true; }); }); return o; })();
 var SIZECOL = { 'Zimní bunda':'Velikost zimní bundy','Šusťáková bunda':'Velikost šusťákové bundy','Tepláková souprava':'Velikost teplákové soupravy','Triko':'Velikost trika','Kraťasy':'Velikost kraťasů' };
 var STEPS = ['Hráč','Výběr','Velikosti','Shrnutí'];
 
 /* ================================ STAV =================================== */
 var S = { step:0, name:'', kat:'', email:'', set:false, pick:[], sizes:{}, note:'', consent:false, hp:'', tried:{}, sent:null, busy:false };
+var STOCK = null;   // { 'Triko|M': true, ... } = fyzicky skladem; null = sklad neznámý
 var DKEY = 'sklad_objednavka_v2';
 try { var d = JSON.parse(localStorage.getItem(DKEY) || 'null'); if (d) ['name','kat','email','set','pick','sizes','note'].forEach(function(k){ if (d[k] != null) S[k] = d[k]; }); } catch(e){}
 function save(){ try { localStorage.setItem(DKEY, JSON.stringify({ name:S.name, kat:S.kat, email:S.email, set:S.set, pick:S.pick, sizes:S.sizes, note:S.note })); } catch(e){} }
@@ -303,6 +321,33 @@ function chosen(){ return S.set ? ALL.slice() : ALL.filter(function(k){ return S
 function total(){ return S.set ? SET.price : sumOf(chosen()); }
 function saving(){ return sumOf(ALL) - SET.price; }
 function totalText(){ return chosen().length ? kc(total()) : '–'; }
+function avail(k, z){ // true = skladem, false = skladem u dodavatele, null = nevíme
+  if (!STOCK) return null;
+  var it = item(k); if (it.size && !z) return null;
+  return !!STOCK['' + k + '|' + (it.size ? z : '-')];
+}
+function badge(k){ var a = avail(k, S.sizes[k]); return a === null ? '' : (a ? '<span class="st in">Skladem</span>' : '<span class="st out">Skladem u dodavatele</span>'); }
+function stockSplit(){ // rozdělení vybraných kusů podle dostupnosti
+  var r = { inS:[], out:[], unk:[] };
+  chosen().forEach(function(k){ var a = avail(k, S.sizes[k]); (a === null ? r.unk : (a ? r.inS : r.out)).push(k); });
+  return r;
+}
+function loadStock(){
+  if (DEMO) { STOCK = DEMO_STOCK; return; }
+  if (!CONFIG.ENDPOINT) return;
+  fetch(CONFIG.ENDPOINT + '?action=stock' + (CONFIG.TOKEN ? '&token=' + encodeURIComponent(CONFIG.TOKEN) : ''))
+    .then(function(r){ return r.json(); })
+    .then(function(j){ if (j && j.ok && j.stock) { STOCK = j.stock; var a = document.activeElement; if (!S.sent && (S.step === 2 || (S.step === 3 && !(a && /^(INPUT|TEXTAREA)$/.test(a.tagName))))) render(true); else renderChrome(); } })
+    .catch(function(){});   // bez údajů o skladu formulář funguje dál, jen bez štítků
+}
+function howBox(){
+  var r = stockSplit(), known = STOCK && !r.unk.length, rows = [];
+  if (!known || r.inS.length) rows.push('<p><span>✅</span><span><b>Zboží skladem</b> bude připravené k vyzvednutí v rámci několika dní.</span></p>');
+  if (!known || r.out.length) rows.push('<p><span>📦</span><span><b>Zboží, které není skladem,</b> je skladem u dodavatele. Objednáme ho pro tebe a termín vyzvednutí upřesníme e-mailem.</span></p>');
+  rows.push('<p><span>✉️</span><span>Po odeslání ti přijde <b>potvrzení e-mailem</b>.</span></p>');
+  rows.push('<p><span>💳</span><span>V následujících dnech bude <b>platba zadána do KIS</b>.</span></p>');
+  return '<div class="how"><h4>Jak to bude dál</h4>' + rows.join('') + '</div>';
+}
 function sizedItems(){ return chosen().filter(function(k){ return item(k).size; }); }
 function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
 function nameOk(v){ return v.trim().split(/\s+/).filter(Boolean).length >= 2 && v.trim().length >= 5; }
@@ -374,26 +419,28 @@ function step1(){
     '<div class="xgrid">' + tiles + '</div>' + nudge;
 }
 function step2(){
-  var t = S.tried[2], list = sizedItems(), noSize = chosen().filter(function(k){ return !item(k).size; });
+  var t = S.tried[2], list = chosen(), sized = sizedItems();
   return '<p class="eyebrow">Krok 3</p><h2>Velikosti</h2><p class="lead">U sportovního oblečení raději vol o číslo větší, hráč do něj ještě doroste.</p>' +
-    (list.length > 1 ? '<div class="same"><span>Stejná velikost pro vše:</span><div class="sizes">' + SIZES.map(function(z){ return '<button type="button" data-all="' + z + '">' + z + '</button>'; }).join('') + '</div></div>' : '') +
+    (sized.length > 1 ? '<div class="same"><span>Stejná velikost pro vše:</span><div class="sizes">' + SIZES.map(function(z){ return '<button type="button" data-all="' + z + '">' + z + '</button>'; }).join('') + '</div></div>' : '') +
+    (STOCK ? '<div class="legend"><span><i style="background:var(--green)"></i>Skladem: připraveno v rámci několika dní</span><span><i style="background:var(--amber)"></i>Tečka u velikosti = skladem u dodavatele</span></div>' : '') +
     '<div class="items">' + list.map(function(k){ var it = item(k), v = S.sizes[k];
-      return '<div class="sz' + (v ? ' ok' : (t ? ' bad' : '')) + '"><div class="pic"><img src="img/' + it.img + '.webp" alt=""></div><div><div class="nm"><span>' + esc(k) + '</span><span class="b">' + (v ? esc(v) : 'vyber') + '</span></div>' +
-        '<div class="sizes">' + SIZES.map(function(z){ return '<button type="button" class="' + (v === z ? 'on' : '') + '" data-sz="' + esc(k) + '|' + z + '">' + z + '</button>'; }).join('') + '</div></div></div>'; }).join('') + '</div>' +
-    (noSize.length ? '<div class="note">' + esc(noSize.join(', ')) + ' – velikost se nevybírá.</div>' : '') +
-    (!list.length ? '<div class="note">V objednávce není nic, co by mělo velikost. Pokračuj dál.</div>' : '');
+      var ok = !it.size || v;
+      return '<div class="sz' + (ok ? ' ok' : (t ? ' bad' : '')) + '"><div class="pic"><img src="img/' + it.img + '.webp" alt=""></div><div><div class="nm"><span>' + esc(k) + '</span><span class="b">' + (it.size ? (v ? esc(v) : 'vyber') : 'univerzální') + '</span></div>' +
+        (it.size ? '<div class="sizes">' + SIZES.map(function(z){ return '<button type="button" class="' + (v === z ? 'on' : '') + (STOCK && !STOCK[k + '|' + z] ? ' oos' : '') + '" data-sz="' + esc(k) + '|' + z + '">' + z + '</button>'; }).join('') + '</div>' : '') +
+        '<div class="avail">' + badge(k) + '</div></div></div>'; }).join('') + '</div>' +
+    (!sized.length ? '<div class="note">V objednávce není nic, co by mělo velikost. Pokračuj dál.</div>' : '');
 }
 function step3(){
   var ch = chosen();
-  return '<p class="eyebrow">Krok 4</p><h2>Skoro hotovo</h2><p class="lead">Zkontroluj si objednávku. Po odeslání dostaneš potvrzení e-mailem.</p>' +
+  return '<p class="eyebrow">Krok 4</p><h2>Skoro hotovo</h2><p class="lead">Zkontroluj si objednávku a dostupnost jednotlivých kusů.</p>' +
     '<div class="ticket"><div class="part"><div class="kv"><span>Hráč</span><span>' + esc(S.name) + '</span></div><div class="kv"><span>Kategorie</span><span>' + esc(KAT_FULL[S.kat] || S.kat) + '</span></div><div class="kv"><span>E-mail</span><span>' + esc(S.email) + '</span></div></div>' +
     '<div class="perf"></div><div class="part"><div class="kv" style="padding-top:0"><span>Objednávka</span><span>' + (S.set ? esc(SET.k) + ' · ' + kc(SET.price) : 'Jednotlivé kusy') + '</span></div>' +
     ch.map(function(k){ var it = item(k);
-      return '<div class="line"><div class="th"><img src="' + img(k) + '" alt=""></div><div><div class="nm">' + esc(k) + '</div><div class="sub">' + (it.size ? 'Velikost ' + esc(S.sizes[k] || '?') : 'Univerzální') + '</div></div>' +
+      return '<div class="line"><div class="th"><img src="' + img(k) + '" alt=""></div><div><div class="nm">' + esc(k) + '</div><div class="sub">' + (it.size ? 'Velikost ' + esc(S.sizes[k] || '?') : 'Univerzální') + '</div><div class="avail" style="margin-top:4px;min-height:0">' + badge(k) + '</div></div>' +
         '<div class="pr">' + (S.set ? '' : kc(it.price)) + '</div></div>'; }).join('') +
     (S.set ? '<div class="kv" style="border-top:1px solid rgba(255,255,255,.06);margin-top:6px;padding-top:12px"><span>Úspora oproti kusům</span><span style="color:var(--green)">' + kc(saving()) + '</span></div>' : '') +
     '</div><div class="perf"></div><div class="part"><div class="total"><span>Celkem</span><b>' + totalText() + '</b></div></div></div>' +
-    '<div class="fld"><textarea id="f_note" placeholder=" ">' + esc(S.note) + '</textarea><label for="f_note">Poznámka (nepovinné)</label></div>' +
+    howBox() + '<div class="fld"><textarea id="f_note" placeholder=" ">' + esc(S.note) + '</textarea><label for="f_note">Poznámka (nepovinné)</label></div>' +
     '<input class="hp" id="f_hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
     '<label class="consent' + (S.tried[3] && !S.consent ? ' bad' : '') + '"><input type="checkbox" id="f_consent"' + (S.consent ? ' checked' : '') + '><span>Souhlasím se zpracováním uvedených údajů pro účely vyřízení objednávky klubového oblečení.</span></label>';
 }
@@ -401,8 +448,8 @@ function stepDone(){
   var o = S.sent;
   return '<div class="done"><div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><path d="M30 52l14 14 27-30"/></svg></div>' +
     '<p class="eyebrow">' + (o.mail ? 'Ještě jeden klik' : 'Objednávka odeslána') + '</p><h1>' + (o.mail ? 'Dokonči <em>e-mailem</em>' : 'Díky, <em>' + esc(S.name.split(/\s+/)[0]) + '</em>!') + '</h1>' +
-    '<p class="lead" style="margin:10px auto 0">' + (o.mail ? 'Odesílací služba zatím není zapojená. Otevři předvyplněný e-mail a odešli ho klubu.' : 'Objednávku jsme přijali. Až bude oblečení nachystané, pošleme ti e-mail s místem a časem vyzvednutí.') + '</p>' +
-    '<div class="code">' + esc(o.code) + '</div><div class="kv" style="justify-content:center;gap:8px"><span>Celkem</span><span style="color:var(--accent);font-weight:700">' + totalText() + '</span></div>' +
+    '<p class="lead" style="margin:10px auto 0">' + (o.mail ? 'Odesílací služba zatím není zapojená. Otevři předvyplněný e-mail a odešli ho klubu.' : 'Objednávku jsme přijali a potvrzení ti přijde e-mailem. Až bude oblečení nachystané, ozveme se s místem a časem vyzvednutí.') + '</p>' +
+    (o.mail ? '' : howBox()) + '<div class="code">' + esc(o.code) + '</div><div class="kv" style="justify-content:center;gap:8px"><span>Celkem</span><span style="color:var(--accent);font-weight:700">' + totalText() + '</span></div>' +
     '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px">' +
     (o.mail ? '<a class="btn pri" href="' + esc(o.mail) + '">Otevřít e-mail' + ICON.send + '</a><button class="btn" type="button" id="copyBtn">Zkopírovat text</button>' : '') +
     '<button class="btn' + (o.mail ? ' ghost' : ' pri') + '" type="button" id="again">Nová objednávka</button></div></div>';
@@ -440,6 +487,9 @@ function payload(){
     'Poznámka': S.note.trim(), 'Celková cena': total() + ' Kč'
   };
   Object.keys(SIZECOL).forEach(function(k){ o[SIZECOL[k]] = ch.indexOf(k) !== -1 ? (S.sizes[k] || '') : ''; });
+  var r = stockSplit();
+  if (r.out.length) o['Poznámka'] = (o['Poznámka'] ? o['Poznámka'] + '\n' : '') + '[Není skladem, skladem u dodavatele: ' + r.out.map(function(k){ return k + (item(k).size ? ' ' + S.sizes[k] : ''); }).join(', ') + ']';
+  o['Souhrn'] = ch.map(function(k){ var a = avail(k, S.sizes[k]); return k + (item(k).size ? ' – velikost ' + S.sizes[k] : '') + (a === null ? '' : (a ? ' – skladem' : ' – skladem u dodavatele')); }).join('\n');
   return o;
 }
 function mailBody(p){ return Object.keys(p).filter(function(k){ return p[k]; }).map(function(k){ return k + ': ' + p[k]; }).join('\n'); }
@@ -505,6 +555,7 @@ document.addEventListener('pointermove', function(e){
   Array.prototype.forEach.call(st.children, function(c, i){ var d = (i % 3 + 1) * 5; c.style.translate = (x * d) + 'px ' + (y * d) + 'px'; });
 });
 render(true);
+loadStock();
 </script>
 </body>
 </html>
