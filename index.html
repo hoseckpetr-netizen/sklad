@@ -509,9 +509,15 @@ function fillTemplate(txt, o){
 function sendTemplate(key, o){
   var t = M.emails[key]; if (!t) return Promise.resolve(false);
   if (!o.email) { toast('Rodič nemá vyplněný e-mail – e-mail se neodeslal.', 'err'); return Promise.resolve(false); }
-  return B.mail(o.email, fillTemplate(t.predmet, o), fillTemplate(t.text, o), M.settings.email_odesilatel || 'info@fkslovany.cz')
-    .then(function(){ logAct(o, 'E-mail odeslán', key + ' → ' + o.email); return flushLog().then(function(){ return true; }); })
-    .catch(function(e){ logAct(o, 'E-mail NEODESLÁN', key + ': ' + e.message); flushLog(); toast('E-mail se nepodařilo odeslat: ' + e.message, 'err'); return false; });
+  var subject = fillTemplate(t.predmet, o), text = fillTemplate(t.text, o);
+  return B.mail(o.email, subject, text, M.settings.email_odesilatel || 'info@fkslovany.cz')
+    .then(function(){ logAct(o, 'E-mail odeslán', 'Šablona „' + key + '“ · Komu: ' + o.email + ' · Předmět: „' + subject + '“\n\n' + text); return flushLog(); })
+    .then(function(){ return loadAll(); }).then(function(){ renderAll(); return true; })
+    .catch(function(e){
+      logAct(o, 'E-mail NEODESLÁN', 'Šablona „' + key + '“ · Komu: ' + o.email + ' · ' + e.message + '\n\n' + text); flushLog();
+      toast('E-mail se nepodařilo odeslat: ' + e.message, 'err');
+      return loadAll().then(function(){ renderAll(); return false; }).catch(function(){ return false; });
+    });
 }
 
 /* ---- mimořádná zpráva k objednávce (ruční, mimo automatické šablony) ---- */
@@ -548,12 +554,13 @@ function actSendMsg(o){
   return confirmBox('Odeslat zprávu rodiči?', o.email + '\n„' + subject + '“', 'Odeslat').then(function(ok){
     if (!ok) return;
     return B.mail(o.email, subject, text, M.settings.email_odesilatel || 'info@fkslovany.cz').then(function(){
-      logAct(o, 'E-mail odeslán (mimořádné sdělení)', subject); return flushLog();
-    }).then(function(){
-      UI.msg = false; UI.msgDraft = null; renderOrderSheet(); toast('Zpráva odeslána', 'ok');
+      logAct(o, 'E-mail odeslán (mimořádné sdělení)', 'Komu: ' + o.email + ' · Předmět: „' + subject + '“\n\n' + text); return flushLog();
+    }).then(function(){ return loadAll(); }).then(function(){
+      UI.msg = false; UI.msgDraft = null; renderAll(); toast('Zpráva odeslána', 'ok');
     }).catch(function(e){
-      logAct(o, 'E-mail NEODESLÁN (mimořádné)', subject + ': ' + e.message); flushLog();
+      logAct(o, 'E-mail NEODESLÁN (mimořádné)', 'Komu: ' + o.email + ' · Předmět: „' + subject + '“ · ' + e.message + '\n\n' + text); flushLog();
       toast('Zprávu se nepodařilo odeslat: ' + e.message, 'err');
+      return loadAll().then(function(){ renderAll(); }).catch(function(){});
     });
   });
 }
@@ -652,7 +659,13 @@ function actObnovitSmazano(o){
     return save(B.update([orderUpdate(o, { stav: o.prB ? 'pripraveno' : 'nova' })]), 'Objednávka obnovena');
   });
 }
-function histRow(h, withName){ return '<div class="kv" style="font-size:11.5px;align-items:flex-start"><span>' + (withName && h.hrac ? '<b>' + esc(h.hrac) + '</b> · ' : '') + esc(h.akce) + (h.detail ? ' <span class="muted">· ' + esc(h.detail) + '</span>' : '') + '</span><span class="muted" style="white-space:nowrap;text-align:right">' + esc(fmtDT(h.cas)) + '<br>' + esc(shortUser(h.kdo)) + '</span></div>'; }
+function histRow(h, withName){
+  var isMail = /^E-mail/.test(h.akce || ''), short = h.detail || '', body = '';
+  if (isMail && h.detail) { var i = h.detail.indexOf('\n\n'); if (i !== -1) { short = h.detail.slice(0, i); body = h.detail.slice(i + 2); } }
+  var out = '<div class="kv" style="font-size:11.5px;align-items:flex-start"><span>' + (withName && h.hrac ? '<b>' + esc(h.hrac) + '</b> · ' : '') + esc(h.akce) + (short ? ' <span class="muted">· ' + esc(short) + '</span>' : '') + '</span><span class="muted" style="white-space:nowrap;text-align:right">' + esc(fmtDT(h.cas)) + '<br>' + esc(shortUser(h.kdo)) + '</span></div>';
+  if (body) out += '<details style="margin:-3px 0 7px"><summary class="mini" style="cursor:pointer;color:var(--accent)">Zobrazit text e-mailu</summary><div class="mini" style="white-space:pre-line;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:4px">' + esc(body) + '</div></details>';
+  return out;
+}
 function histHtml(o){
   var l = (M.histBy && M.histBy[o.id]) || [];
   if (!l.length) return '';
