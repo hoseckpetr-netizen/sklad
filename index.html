@@ -514,6 +514,50 @@ function sendTemplate(key, o){
     .catch(function(e){ logAct(o, 'E-mail NEODESLÁN', key + ': ' + e.message); flushLog(); toast('E-mail se nepodařilo odeslat: ' + e.message, 'err'); return false; });
 }
 
+/* ---- mimořádná zpráva k objednávce (ruční, mimo automatické šablony) ---- */
+var MSG_PRESETS = [
+  { label: 'Objednávka se opozdila', subject: 'Omlouváme se za zdržení – FK Slovany Pardubice',
+    text: function(o){ return 'Ahoj,\n\nvaše objednávka klubového oblečení pro ' + (o.hrac || '') + ' se bohužel oproti plánu trochu opozdila. Omlouváme se za zdržení – pracujeme na tom a ozveme se, jakmile bude oblečení připravené k vyzvednutí.\n\nDíky za trpělivost.\n\nFK Slovany Pardubice'; } },
+  { label: 'Upomínka platby', subject: 'Prosíme o úhradu objednávky – FK Slovany Pardubice',
+    text: function(o){ return 'Ahoj,\n\nu objednávky klubového oblečení pro ' + (o.hrac || '') + ' (' + kc(o.cena) + ') evidujeme zatím neuhrazenou platbu přes KIS. Mohli byste to prosím zkontrolovat?\n\nJakmile bude platba evidovaná, oblečení rovnou připravíme k vyzvednutí.\n\nDíky!\n\nFK Slovany Pardubice'; } },
+  { label: 'Chybí velikost', subject: 'Potřebujeme doplnit velikost – FK Slovany Pardubice',
+    text: function(o){ return 'Ahoj,\n\nu objednávky klubového oblečení pro ' + (o.hrac || '') + ' nám chybí vyplněná velikost u jedné z položek. Mohli byste nám ji prosím poslat odpovědí na tento e-mail, nebo ji doladit s trenérem po tréninku?\n\nDíky!\n\nFK Slovany Pardubice'; } },
+  { label: 'Chybí na skladě', subject: 'Drobné zdržení kvůli skladu – FK Slovany Pardubice',
+    text: function(o){ return 'Ahoj,\n\nu objednávky klubového oblečení pro ' + (o.hrac || '') + ' nám momentálně chybí část zboží skladem. Objednáváme ho u dodavatele a jakmile dorazí, dáme vědět a oblečení připravíme k vyzvednutí.\n\nDíky za pochopení.\n\nFK Slovany Pardubice'; } }
+];
+function messageForm(o){
+  var d = UI.msgDraft && UI.msgDraft.id === o.id ? UI.msgDraft : { subject: 'Ohledně vaší objednávky – FK Slovany Pardubice', text: '' };
+  var presets = MSG_PRESETS.map(function(p, i){ return '<button class="chip" data-act="msgpreset" data-i="' + i + '">' + esc(p.label) + '</button>'; }).join('');
+  return '<h3>Mimořádná zpráva</h3><div class="mini">' + (o.email ? 'Odešle se rodiči na <b>' + esc(o.email) + '</b>' : '<span class="neg">Rodič nemá vyplněný e-mail – zprávu nelze odeslat, nejdřív ho doplňte v „Upravit údaje“.</span>') + '</div>' +
+    '<div class="sect">Rychlé předlohy</div><div class="chips" style="margin:0 -12px 2px;padding-left:12px;padding-right:12px">' + presets + '</div>' +
+    '<label class="f">Předmět</label><input class="in" id="msg_subj" value="' + esc(d.subject) + '">' +
+    '<label class="f">Text zprávy</label><textarea class="in" id="msg_text" style="min-height:160px" placeholder="Napište zprávu pro rodiče…">' + esc(d.text) + '</textarea>' +
+    '<div class="row" style="margin-top:12px"><button class="btn" data-act="msgcancel">Zpět</button><button class="btn pri" data-act="msgsend"' + (!o.email ? ' disabled' : '') + '>Odeslat e-mail</button></div>';
+}
+function applyPreset(o, idx){
+  var p = MSG_PRESETS[idx]; if (!p) return;
+  UI.msgDraft = { id: o.id, subject: p.subject, text: p.text(o) };
+  renderOrderSheet();
+}
+function actSendMsg(o){
+  var subject = (document.getElementById('msg_subj') || {}).value || '', text = (document.getElementById('msg_text') || {}).value || '';
+  subject = subject.trim(); text = text.trim();
+  UI.msgDraft = { id: o.id, subject: subject, text: text };
+  if (!o.email) { toast('Rodič nemá vyplněný e-mail.', 'err'); return Promise.resolve(); }
+  if (!subject || !text) { toast('Vyplňte předmět i text zprávy.', 'err'); return Promise.resolve(); }
+  return confirmBox('Odeslat zprávu rodiči?', o.email + '\n„' + subject + '“', 'Odeslat').then(function(ok){
+    if (!ok) return;
+    return B.mail(o.email, subject, text, M.settings.email_odesilatel || 'info@fkslovany.cz').then(function(){
+      logAct(o, 'E-mail odeslán (mimořádné sdělení)', subject); return flushLog();
+    }).then(function(){
+      UI.msg = false; UI.msgDraft = null; renderOrderSheet(); toast('Zpráva odeslána', 'ok');
+    }).catch(function(e){
+      logAct(o, 'E-mail NEODESLÁN (mimořádné)', subject + ': ' + e.message); flushLog();
+      toast('Zprávu se nepodařilo odeslat: ' + e.message, 'err');
+    });
+  });
+}
+
 function actKisZadano(o){
   var on = !o.kzB;
   if (!on && o.kisB) { toast('Nejdřív zrušte „Zaplaceno“.', 'err'); return Promise.resolve(); }
@@ -712,7 +756,7 @@ function openSheet(html){ var h = document.getElementById('ovHost'); var ex = h.
   var d = document.createElement('div'); d.className = 'ov main'; d.innerHTML = '<div class="sheet"><div class="grab"></div>' + html + '</div>';
   d.onclick = function(e){ if (e.target === d) closeSheet(); }; h.appendChild(d); }
 function closeSheet(fromPop){
-  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; UI.edit = false; UI.draft = null;
+  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; UI.edit = false; UI.draft = null; UI.msg = false; UI.msgDraft = null;
   if (UI.sheetPushed) { UI.sheetPushed = false; if (fromPop !== true) { UI.ignorePop = true; try { history.back(); } catch (e) { UI.ignorePop = false; } } }
 }
 function pushNav(state){ try { history.pushState(state, ''); } catch (e) {} }
@@ -817,6 +861,7 @@ function orderCard(o){
 function renderOrderSheet(){
   var o = M.orders.filter(function(x){ return x.id === UI.openOrder; })[0]; if (!o) { closeSheet(); return; }
   if (UI.edit) { openSheet(editForm(o)); return; }
+  if (UI.msg) { openSheet(messageForm(o)); return; }
   var open = isOpen(o), anyRem = o.items.some(function(i){ return i.ks - i.vydano_ks > 0; }), anyDone = o.items.some(function(i){ return i.vydano_ks > 0; });
   var its = o.items.map(function(i){
     var rem = i.ks - i.vydano_ks, chip;
@@ -834,7 +879,7 @@ function renderOrderSheet(){
     (o.extra ? '<div class="kv"><span class="muted">Navíc</span><span style="text-align:right">' + esc(o.extra) + '</span></div>' : '') +
     '<div class="kv"><span class="muted">Cena</span><b>' + kc(o.cena) + '</b></div><div class="kv"><span class="muted">E-mail</span><span>' + (o.email ? '<a style="color:var(--accent)" href="mailto:' + esc(o.email) + '">' + esc(o.email) + '</a>' : '<span class="neg">chybí</span>') + '</span></div>' +
     (o.poznamka ? '<div class="kv"><span class="muted">Poznámka</span><span style="text-align:right">' + esc(o.poznamka) + '</span></div>' : '') + '</div>' +
-    '<button class="btn blk" style="height:34px;margin-bottom:8px" data-act="edit">✎ Upravit údaje a položky</button>' +
+    '<div class="row" style="margin-bottom:8px"><button class="btn" style="height:34px" data-act="edit">✎ Upravit údaje</button><button class="btn" style="height:34px" data-act="msg">✉ Mimořádná zpráva</button></div>' +
     '<div class="tg"><div class="l">Platba zadána do KIS<small>' + (o.kzB ? (o.kis_zadano_cas ? esc(fmtDT(o.kis_zadano_cas)) + ' · ' : '') + esc(o.kis_zadano_kdo || '') : 'zatím nezadáno') + '</small></div><button class="sw ' + (o.kzB ? 'on' : '') + '" data-act="kiszad" aria-label="Zadáno do KIS"></button></div>' +
     '<div class="tg"><div class="l">Zaplaceno<small>' + (o.kisB ? (o.kis_cas ? esc(fmtDT(o.kis_cas)) + ' · ' : '') + esc(o.kis_kdo || '') : 'čeká na platbu') + '</small></div><button class="sw ' + (o.kisB ? 'on' : '') + '" data-act="kis" aria-label="Zaplaceno"></button></div>' +
     '<div class="tg"><div class="l">Připraveno k vyzvednutí<small>' + (o.prB ? esc(fmtDT(o.pripraveno_cas)) + ' ' + esc(o.pripraveno_kdo) : 'odešle e-mail rodiči') + '</small></div><button class="sw ' + (o.prB ? 'on' : '') + '" data-act="prip" aria-label="Připraveno"' + (o.stav === 'storno' || o.stav === 'smazano' ? ' disabled' : '') + '></button></div>' +
@@ -986,6 +1031,10 @@ document.addEventListener('click', function(e){
     case 'edit': if (o) { UI.edit = true; UI.draft = null; renderOrderSheet(); } break;
     case 'editcancel': UI.edit = false; UI.draft = null; renderOrderSheet(); break;
     case 'editsave': if (o) actEditSave(o); break;
+    case 'msg': if (o) { UI.msg = true; UI.msgDraft = null; renderOrderSheet(); } break;
+    case 'msgcancel': UI.msg = false; UI.msgDraft = null; renderOrderSheet(); break;
+    case 'msgpreset': if (o) applyPreset(o, parseInt(t.getAttribute('data-i'), 10)); break;
+    case 'msgsend': if (o) actSendMsg(o); break;
     case 'delitem': if (o) { stashDraft(); actDelItem(o, t.getAttribute('data-iid')); } break;
     case 'additem': if (o) { stashDraft(); actAddItem(o); } break;
     case 'vydatvse': var vo = M.orders.filter(function(x){ return x.id === t.getAttribute('data-id'); })[0]; if (vo) actVydat(vo, vo.items.map(function(i){ return i.id; })); break;
