@@ -148,7 +148,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '2. 10. 2026 – nová ikona (iPhone i Android)';
+var APP_VERSION = '5. 10. 2026 – výměna velikosti, obsah e-mailů v historii';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -749,6 +749,45 @@ function actSize(o, itemId, sz){
   logAct(o, 'Úprava položky', txt);
   return save(B.update([itemUpdate(it, { velikost: sz })]));
 }
+/* ---- výměna velikosti u již vydané objednávky ---- */
+function xchItems(o){ return o.items.filter(function(i){ return i.vydano_ks > 0 && !NOSIZE[i.item]; }); }
+function exchangeForm(o){
+  var its = xchItems(o), d = UI.xchDraft && UI.xchDraft.id === o.id ? UI.xchDraft : {};
+  var opts = its.map(function(i){ return '<option value="' + esc(i.id) + '"' + (d.iid === i.id ? ' selected' : '') + '>' + esc(i.item + ' ' + (i.velikost || '?') + ' (vydáno ' + i.vydano_ks + ' ks)') + '</option>'; }).join('');
+  var sz = SIZES.map(function(x){ return '<option' + (d.size === x ? ' selected' : '') + '>' + x + '</option>'; }).join('');
+  return '<h3>Výměna velikosti</h3><div class="mini">Vrácený kus se vrátí na sklad, nová velikost se ze skladu odečte. Rodiči se žádný e-mail neodešle.</div>' +
+    '<label class="f">Vyměňovaná položka</label><select class="in" id="xc_item">' + opts + '</select>' +
+    '<div class="row"><div><label class="f">Nová velikost</label><select class="in" id="xc_size"><option value="">?</option>' + sz + '</select></div>' +
+    '<div style="max-width:90px"><label class="f">Počet ks</label><input class="in" id="xc_n" type="number" min="1" inputmode="numeric" value="' + esc(d.n || 1) + '" style="text-align:center"></div></div>' +
+    '<label class="f">Důvod / poznámka (nepovinné)</label><input class="in" id="xc_note" value="' + esc(d.note || '') + '" placeholder="např. malé, kluk vyrostl">' +
+    '<div class="row" style="margin-top:12px"><button class="btn" data-act="xchcancel">Zpět</button><button class="btn pri" data-act="xchsave">Provést výměnu</button></div>';
+}
+function actExchange(o){
+  var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+  var it = o.items.filter(function(i){ return i.id === g('xc_item'); })[0], ns = g('xc_size'), n = parseInt(g('xc_n'), 10) || 0, note = g('xc_note').trim();
+  UI.xchDraft = { id: o.id, iid: g('xc_item'), size: ns, n: n || 1, note: note };
+  if (!it) { toast('Vyberte položku.', 'err'); return Promise.resolve(); }
+  if (!validSize(it.item, ns)) { toast('Zvolte novou velikost.', 'err'); return Promise.resolve(); }
+  if (ns === it.velikost) { toast('Nová velikost je stejná jako stávající.', 'err'); return Promise.resolve(); }
+  if (n < 1 || n > it.vydano_ks) { toast('Počet musí být 1 až ' + it.vydano_ks + '.', 'err'); return Promise.resolve(); }
+  if ((M.stock[it.item + '|' + ns] || 0) < n) { toast('Velikost ' + ns + ' není skladem v dostatečném počtu (' + (M.stock[it.item + '|' + ns] || 0) + ' ks).', 'err'); return Promise.resolve(); }
+  var old = it.velikost || '?', txt = n + '× ' + it.item + ' ' + old + ' → ' + ns;
+  return confirmBox('Provést výměnu?', o.hrac + '\n' + txt + '\nVrácený kus (' + old + ') se přičte na sklad, nový (' + ns + ') se odečte. E-mail se neodešle.', 'Vyměnit').then(function(ok){
+    if (!ok) return;
+    logAct(o, 'Výměna velikosti', txt + (note ? ' · ' + note : ''));
+    var mv = [], ups = [], adds = [], nm = 'Výměna – ' + o.hrac;
+    if (validSize(it.item, it.velikost)) mv.push(moveRow('VRACENI', it.item, it.velikost, n, o.id, nm + ' (vráceno ' + old + ')'));
+    mv.push(moveRow('VYDEJ', it.item, ns, -n, o.id, nm + ' (vydáno ' + ns + ')'));
+    if (n === it.ks && it.vydano_ks === it.ks) ups.push(itemUpdate(it, { velikost: ns }));
+    else {
+      ups.push(itemUpdate(it, { ks: it.ks - n, vydano_ks: it.vydano_ks - n }));
+      adds.push(toRow('Polozky', { id: uid('p'), order_id: o.id, item: it.item, velikost: ns, ks: n, vydano_ks: n, puvod: it.puvod || 'rucne' }));
+    }
+    ups.push(orderUpdate(o, {}));
+    UI.xch = false; UI.xchDraft = null;
+    return save(B.append('Pohyby', mv).then(function(){ return B.update(ups); }).then(function(){ return adds.length ? B.append('Polozky', adds) : null; }), 'Výměna provedena: ' + txt);
+  });
+}
 function actNote(o, txt){ logAct(o, 'Poznámka personálu změněna', String(txt || '').slice(0, 80)); return save(B.update([orderUpdate(o, { poznamka_personal: txt })]), 'Poznámka uložena'); }
 
 /* ================================ UI ===================================== */
@@ -769,7 +808,7 @@ function openSheet(html){ var h = document.getElementById('ovHost'); var ex = h.
   var d = document.createElement('div'); d.className = 'ov main'; d.innerHTML = '<div class="sheet"><div class="grab"></div>' + html + '</div>';
   d.onclick = function(e){ if (e.target === d) closeSheet(); }; h.appendChild(d); }
 function closeSheet(fromPop){
-  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; UI.edit = false; UI.draft = null; UI.msg = false; UI.msgDraft = null;
+  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; UI.edit = false; UI.draft = null; UI.msg = false; UI.msgDraft = null; UI.xch = false; UI.xchDraft = null;
   if (UI.sheetPushed) { UI.sheetPushed = false; if (fromPop !== true) { UI.ignorePop = true; try { history.back(); } catch (e) { UI.ignorePop = false; } } }
 }
 function pushNav(state){ try { history.pushState(state, ''); } catch (e) {} }
@@ -875,6 +914,7 @@ function renderOrderSheet(){
   var o = M.orders.filter(function(x){ return x.id === UI.openOrder; })[0]; if (!o) { closeSheet(); return; }
   if (UI.edit) { openSheet(editForm(o)); return; }
   if (UI.msg) { openSheet(messageForm(o)); return; }
+  if (UI.xch) { openSheet(exchangeForm(o)); return; }
   var open = isOpen(o), anyRem = o.items.some(function(i){ return i.ks - i.vydano_ks > 0; }), anyDone = o.items.some(function(i){ return i.vydano_ks > 0; });
   var its = o.items.map(function(i){
     var rem = i.ks - i.vydano_ks, chip;
@@ -898,6 +938,7 @@ function renderOrderSheet(){
     '<div class="tg"><div class="l">Připraveno k vyzvednutí<small>' + (o.prB ? esc(fmtDT(o.pripraveno_cas)) + ' ' + esc(o.pripraveno_kdo) : 'odešle e-mail rodiči') + '</small></div><button class="sw ' + (o.prB ? 'on' : '') + '" data-act="prip" aria-label="Připraveno"' + (o.stav === 'storno' || o.stav === 'smazano' ? ' disabled' : '') + '></button></div>' +
     '<div class="sect">Položky' + (o.vyB ? ' – vydáno ' + fmtDT(o.vydano_cas) : '') + '</div>' + (its || '<div class="muted">Žádné položky (neznámý typ setu). Doplňte ručně v databázi.</div>') +
     (anyRem && o.stav !== 'storno' && o.stav !== 'smazano' ? '<button class="btn pri blk" style="margin-top:12px" data-act="vydat">Vydat vybrané</button>' : '') +
+    (anyDone && o.stav !== 'storno' && o.stav !== 'smazano' && xchItems(o).length ? '<button class="btn blk" style="margin-top:8px" data-act="xch">⇄ Výměna velikosti</button>' : '') +
     (anyDone ? '<button class="btn blk" style="margin-top:8px" data-act="vratit">Vrátit výdej</button>' : '') +
     '<label class="f">Poznámka (personál)</label><textarea class="in" id="pn" placeholder="Interní poznámka…">' + esc(o.poznamka_personal) + '</textarea><button class="btn blk" style="margin-top:8px" data-act="note">Uložit poznámku</button>' + histHtml(o) +
     (o.stav === 'smazano'
@@ -1048,6 +1089,9 @@ document.addEventListener('click', function(e){
     case 'msgcancel': UI.msg = false; UI.msgDraft = null; renderOrderSheet(); break;
     case 'msgpreset': if (o) applyPreset(o, parseInt(t.getAttribute('data-i'), 10)); break;
     case 'msgsend': if (o) actSendMsg(o); break;
+    case 'xch': if (o) { UI.xch = true; UI.xchDraft = null; renderOrderSheet(); } break;
+    case 'xchcancel': UI.xch = false; UI.xchDraft = null; renderOrderSheet(); break;
+    case 'xchsave': if (o) actExchange(o); break;
     case 'delitem': if (o) { stashDraft(); actDelItem(o, t.getAttribute('data-iid')); } break;
     case 'additem': if (o) { stashDraft(); actAddItem(o); } break;
     case 'vydatvse': var vo = M.orders.filter(function(x){ return x.id === t.getAttribute('data-id'); })[0]; if (vo) actVydat(vo, vo.items.map(function(i){ return i.id; })); break;
