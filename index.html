@@ -148,7 +148,7 @@ var CONFIG = {
   ADMIN_EMAILS: ['hoseck.petr@gmail.com'],
   STAFF_EMAILS: ['fkslovany@gmail.com']
 };
-var APP_VERSION = '5. 10. 2026 – výměna velikosti, obsah e-mailů v historii';
+var APP_VERSION = '5. 10. 2026 – výměna velikosti, vrácení zboží, obsah e-mailů v historii';
 var DEMO = /[?&]demo=1/.test(location.search);
 
 var SIZES = ['4XS','3XS','2XS','XS','S','M','L','XL','XXL'];
@@ -788,6 +788,41 @@ function actExchange(o){
     return save(B.append('Pohyby', mv).then(function(){ return B.update(ups); }).then(function(){ return adds.length ? B.append('Polozky', adds) : null; }), 'Výměna provedena: ' + txt);
   });
 }
+/* ---- vrácení zboží (bez výměny) u již vydané objednávky ---- */
+function returnForm(o){
+  var its = o.items.filter(function(i){ return i.vydano_ks > 0; }), d = UI.retDraft && UI.retDraft.id === o.id ? UI.retDraft : {};
+  var opts = its.map(function(i){ return '<option value="' + esc(i.id) + '"' + (d.iid === i.id ? ' selected' : '') + '>' + esc(i.item + (NOSIZE[i.item] ? '' : ' ' + (i.velikost || '?')) + ' (vydáno ' + i.vydano_ks + ' ks)') + '</option>'; }).join('');
+  return '<h3>Vrácení zboží</h3><div class="mini">Vrácené kusy se vrátí na sklad a ubudou z objednávky. Rodiči se žádný e-mail neodešle. Vrácení platby řešte ručně v KIS.</div>' +
+    '<label class="f">Vracená položka</label><select class="in" id="rt_item">' + opts + '</select>' +
+    '<div class="row"><div style="max-width:90px"><label class="f">Počet ks</label><input class="in" id="rt_n" type="number" min="1" inputmode="numeric" value="' + esc(d.n || 1) + '" style="text-align:center"></div>' +
+    '<div><label class="f">Cena objednávky po vrácení (Kč)</label><input class="in" id="rt_cena" type="number" min="0" inputmode="numeric" value="' + esc(d.cena !== undefined ? d.cena : num(o.cena)) + '"></div></div>' +
+    '<label class="f">Důvod / poznámka (nepovinné)</label><input class="in" id="rt_note" value="' + esc(d.note || '') + '" placeholder="např. nevyhovuje, přestal hrát">' +
+    '<div class="row" style="margin-top:12px"><button class="btn" data-act="retcancel">Zpět</button><button class="btn pri" data-act="retsave">Provést vrácení</button></div>';
+}
+function actReturn(o){
+  var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+  var it = o.items.filter(function(i){ return i.id === g('rt_item'); })[0], n = parseInt(g('rt_n'), 10) || 0, note = g('rt_note').trim(), cs = g('rt_cena').trim();
+  UI.retDraft = { id: o.id, iid: g('rt_item'), n: n || 1, cena: cs, note: note };
+  if (!it || !(it.vydano_ks > 0)) { toast('Vyberte vydanou položku.', 'err'); return Promise.resolve(); }
+  if (n < 1 || n > it.vydano_ks) { toast('Počet musí být 1 až ' + it.vydano_ks + '.', 'err'); return Promise.resolve(); }
+  if (cs !== '' && !(num(cs) >= 0)) { toast('Cena není platné číslo.', 'err'); return Promise.resolve(); }
+  var oldC = num(o.cena), newC = cs === '' ? oldC : num(cs);
+  var left = o.items.some(function(i){ return (i.id === it.id ? i.ks - n : i.ks) > 0; });
+  var label = n + '× ' + it.item + (NOSIZE[it.item] ? '' : ' ' + (it.velikost || '?'));
+  var txt = label + ' se vrátí na sklad.' + (newC !== oldC ? '\nCena: ' + oldC + ' → ' + newC + ' Kč' : '') + (left ? '' : '\nV objednávce nezůstane žádná položka – bude stornována.') + '\nVrácení platby řešte v KIS. E-mail se neodešle.';
+  return confirmBox('Provést vrácení?', o.hrac + '\n' + txt, 'Vrátit').then(function(ok){
+    if (!ok) return;
+    var mv = [], ups = [], op = {};
+    if (validSize(it.item, it.velikost)) mv.push(moveRow('VRACENI', it.item, it.velikost, n, o.id, 'Vrácení zboží – ' + o.hrac));
+    ups.push(itemUpdate(it, { ks: it.ks - n, vydano_ks: it.vydano_ks - n }));
+    if (newC !== oldC) op.cena = newC;
+    if (!left) { op.stav = 'storno'; op.vydano = false; op.vydano_cas = ''; op.vydano_kdo = ''; }
+    ups.push(orderUpdate(o, op));
+    logAct(o, 'Vrácení zboží', label + (newC !== oldC ? ' · cena ' + oldC + ' → ' + newC + ' Kč' : '') + (left ? '' : ' · objednávka stornována') + (note ? ' · ' + note : ''));
+    UI.ret = false; UI.retDraft = null;
+    return save((mv.length ? B.append('Pohyby', mv) : Promise.resolve()).then(function(){ return B.update(ups); }), 'Vráceno na sklad: ' + label + ' – platbu vraťte v KIS');
+  });
+}
 function actNote(o, txt){ logAct(o, 'Poznámka personálu změněna', String(txt || '').slice(0, 80)); return save(B.update([orderUpdate(o, { poznamka_personal: txt })]), 'Poznámka uložena'); }
 
 /* ================================ UI ===================================== */
@@ -808,7 +843,7 @@ function openSheet(html){ var h = document.getElementById('ovHost'); var ex = h.
   var d = document.createElement('div'); d.className = 'ov main'; d.innerHTML = '<div class="sheet"><div class="grab"></div>' + html + '</div>';
   d.onclick = function(e){ if (e.target === d) closeSheet(); }; h.appendChild(d); }
 function closeSheet(fromPop){
-  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; UI.edit = false; UI.draft = null; UI.msg = false; UI.msgDraft = null; UI.xch = false; UI.xchDraft = null;
+  var ex = document.querySelector('#ovHost .ov.main'); if (ex) ex.remove(); UI.openOrder = null; UI.edit = false; UI.draft = null; UI.msg = false; UI.msgDraft = null; UI.xch = false; UI.xchDraft = null; UI.ret = false; UI.retDraft = null;
   if (UI.sheetPushed) { UI.sheetPushed = false; if (fromPop !== true) { UI.ignorePop = true; try { history.back(); } catch (e) { UI.ignorePop = false; } } }
 }
 function pushNav(state){ try { history.pushState(state, ''); } catch (e) {} }
@@ -915,6 +950,7 @@ function renderOrderSheet(){
   if (UI.edit) { openSheet(editForm(o)); return; }
   if (UI.msg) { openSheet(messageForm(o)); return; }
   if (UI.xch) { openSheet(exchangeForm(o)); return; }
+  if (UI.ret) { openSheet(returnForm(o)); return; }
   var open = isOpen(o), anyRem = o.items.some(function(i){ return i.ks - i.vydano_ks > 0; }), anyDone = o.items.some(function(i){ return i.vydano_ks > 0; });
   var its = o.items.map(function(i){
     var rem = i.ks - i.vydano_ks, chip;
@@ -939,6 +975,7 @@ function renderOrderSheet(){
     '<div class="sect">Položky' + (o.vyB ? ' – vydáno ' + fmtDT(o.vydano_cas) : '') + '</div>' + (its || '<div class="muted">Žádné položky (neznámý typ setu). Doplňte ručně v databázi.</div>') +
     (anyRem && o.stav !== 'storno' && o.stav !== 'smazano' ? '<button class="btn pri blk" style="margin-top:12px" data-act="vydat">Vydat vybrané</button>' : '') +
     (anyDone && o.stav !== 'storno' && o.stav !== 'smazano' && xchItems(o).length ? '<button class="btn blk" style="margin-top:8px" data-act="xch">⇄ Výměna velikosti</button>' : '') +
+    (anyDone && o.stav !== 'storno' && o.stav !== 'smazano' ? '<button class="btn blk" style="margin-top:8px" data-act="ret">↩ Vrácení zboží</button>' : '') +
     (anyDone ? '<button class="btn blk" style="margin-top:8px" data-act="vratit">Vrátit výdej</button>' : '') +
     '<label class="f">Poznámka (personál)</label><textarea class="in" id="pn" placeholder="Interní poznámka…">' + esc(o.poznamka_personal) + '</textarea><button class="btn blk" style="margin-top:8px" data-act="note">Uložit poznámku</button>' + histHtml(o) +
     (o.stav === 'smazano'
@@ -1092,6 +1129,9 @@ document.addEventListener('click', function(e){
     case 'xch': if (o) { UI.xch = true; UI.xchDraft = null; renderOrderSheet(); } break;
     case 'xchcancel': UI.xch = false; UI.xchDraft = null; renderOrderSheet(); break;
     case 'xchsave': if (o) actExchange(o); break;
+    case 'ret': if (o) { UI.ret = true; UI.retDraft = null; renderOrderSheet(); } break;
+    case 'retcancel': UI.ret = false; UI.retDraft = null; renderOrderSheet(); break;
+    case 'retsave': if (o) actReturn(o); break;
     case 'delitem': if (o) { stashDraft(); actDelItem(o, t.getAttribute('data-iid')); } break;
     case 'additem': if (o) { stashDraft(); actAddItem(o); } break;
     case 'vydatvse': var vo = M.orders.filter(function(x){ return x.id === t.getAttribute('data-id'); })[0]; if (vo) actVydat(vo, vo.items.map(function(i){ return i.id; })); break;
